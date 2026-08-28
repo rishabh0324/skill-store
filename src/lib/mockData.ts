@@ -337,3 +337,7 @@ export const MOCK_ANALYTICS: InstitutionAnalytics = {
     { stage: "Offers Generated", count: 382 },
   ],
 };
+
+export const MOCK_STUDENT_SKILLS = MOCK_SKILLS;
+export const MOCK_JOB_POSTINGS = MOCK_JOBS;
+

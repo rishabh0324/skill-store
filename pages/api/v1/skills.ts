@@ -1,41 +1,50 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { MOCK_SKILLS } from "@/lib/mockData";
+import { MOCK_STUDENT_SKILLS } from "@/lib/mockData";
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "GET") {
     const { category } = req.query;
-    let skills = [...MOCK_SKILLS];
+    let skills = MOCK_STUDENT_SKILLS;
 
     if (category && typeof category === "string") {
-      skills = skills.filter((s) => s.category.toLowerCase() === category.toLowerCase());
+      skills = skills.filter(
+        (s) => (s.category || "").toLowerCase() === category.toLowerCase()
+      );
     }
 
     return res.status(200).json({
       success: true,
-      message: "Success",
-      data: {
-        skills,
-        totalCount: skills.length,
-        verifiedCount: skills.filter((s) => s.verificationStatus !== "SELF_REPORTED").length,
-      },
+      message: "Skills retrieved successfully",
+      data: skills,
     });
   }
 
   if (req.method === "POST") {
-    const { name, category, proficiencyLevel, description } = req.body;
+    const { name, category, selfScore } = req.body;
+
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: "Skill name is required",
+      });
+    }
+
     const newSkill = {
-      id: `skill-${Date.now()}`,
+      id: `skill_${Date.now()}`,
       name,
-      category: category || "Technical",
-      proficiencyLevel: Number(proficiencyLevel) || 1,
-      verificationStatus: "SELF_REPORTED",
-      description: description || "Self-reported skill entry",
+      category: category || "Languages",
+      score: selfScore || 70,
+      selfScore: selfScore || 70,
+      proficiencyLevel: selfScore || 70,
+      industryBenchmark: 80,
+      isVerified: false,
+      verificationStatus: "Self-Reported",
     };
 
     return res.status(201).json({
       success: true,
-      message: "Skill self-reported successfully",
-      data: { skill: newSkill },
+      message: "Skill added successfully",
+      data: newSkill,
     });
   }
 

@@ -1,44 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Layers, Mail, Lock, ArrowRight } from "lucide-react";
+import { Layers, Mail, Lock, ArrowRight, AlertCircle, Sparkles, CheckCircle2 } from "lucide-react";
+import { UserRole } from "@/types";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("aarav.sharma@institution.edu.in");
+  const { login, isAuthenticated, user, getDashboardRouteForRole, quickDemoLogin } = useAuth();
+
+  const [email, setEmail] = useState("student@sih.edu");
   const [password, setPassword] = useState("Password@123");
-  const [role, setRole] = useState("STUDENT");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  // If already authenticated, redirect to role dashboard
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const redirectUrl = (router.query.redirect as string) || getDashboardRouteForRole(user.role);
+      router.replace(redirectUrl);
+    }
+  }, [isAuthenticated, user, router, getDashboardRouteForRole]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
     setIsLoading(true);
 
-    try {
-      const res = await fetch("/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, role }),
-      });
-      const data = await res.json();
+    const result = await login({ email, password });
 
-      if (data.success) {
-        if (role === "STUDENT") router.push("/student");
-        else if (role === "RECRUITER") router.push("/recruiter");
-        else if (role === "FACULTY") router.push("/faculty");
-        else router.push("/tpo");
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
+    if (result.success && result.role) {
+      setSuccessMessage("Login successful! Redirecting to your dashboard...");
+      const redirectUrl = (router.query.redirect as string) || getDashboardRouteForRole(result.role);
+      setTimeout(() => {
+        router.push(redirectUrl);
+      }, 500);
+    } else {
+      setErrorMessage(result.message);
       setIsLoading(false);
     }
   };
 
+  const handleQuickFill = (role: UserRole, demoEmail: string) => {
+    setEmail(demoEmail);
+    setPassword("Password@123");
+    setErrorMessage("");
+  };
+
   return (
-    <div className="max-w-md mx-auto py-10">
+    <div className="max-w-md mx-auto py-8">
       <Card className="p-6 sm:p-8 space-y-6">
         <div className="text-center space-y-2">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-primary-600 to-accent-cyan p-0.5 mx-auto shadow-glow flex items-center justify-center">
@@ -46,100 +60,105 @@ export default function LoginPage() {
               <Layers className="text-accent-cyan w-6 h-6" />
             </div>
           </div>
-          <h2 className="text-xl font-bold text-white">Sign in to NEXUS EDU</h2>
-          <p className="text-xs text-slate-400">SIH 2026 Academia–Industry Collaboration Gateway</p>
+          <h2 className="text-2xl font-black text-white tracking-tight">Sign In to NEXUS EDU</h2>
+          <p className="text-xs text-slate-400">SIH 2026 Academia–Industry Collaboration Platform</p>
         </div>
 
-        {/* Quick Demo Fill Buttons */}
-        <div className="space-y-1.5 pt-2">
-          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-            Quick Persona Fill:
-          </p>
+        {/* Quick Demo Fill Buttons for Evaluators */}
+        <div className="p-3.5 rounded-2xl bg-indigo-500/[0.07] border border-indigo-500/20 space-y-2">
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1">
+              <Sparkles size={12} className="text-accent-cyan" /> 1-Click Demo Personas:
+            </span>
+            <span className="text-[10px] text-slate-400 font-mono">Password@123</span>
+          </div>
+
           <div className="grid grid-cols-2 gap-1.5 text-xs">
             <button
               type="button"
-              onClick={() => {
-                setEmail("aarav.sharma@institution.edu.in");
-                setRole("STUDENT");
-              }}
-              className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-left border border-white/5"
+              onClick={() => handleQuickFill("STUDENT", "student@sih.edu")}
+              className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-left border border-white/5 hover:border-indigo-500/30 transition-all flex items-center gap-1.5"
             >
-              🎓 Student
+              <span>🎓</span>
+              <span className="font-medium">Student</span>
             </button>
             <button
               type="button"
-              onClick={() => {
-                setEmail("priya.nair@microsoft.com");
-                setRole("RECRUITER");
-              }}
-              className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-left border border-white/5"
+              onClick={() => handleQuickFill("INDUSTRY", "recruiter@techcorp.com")}
+              className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-left border border-white/5 hover:border-cyan-500/30 transition-all flex items-center gap-1.5"
             >
-              💼 Recruiter
+              <span>💼</span>
+              <span className="font-medium">Industry</span>
             </button>
             <button
               type="button"
-              onClick={() => {
-                setEmail("dr.ramesh@institution.edu.in");
-                setRole("FACULTY");
-              }}
-              className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-left border border-white/5"
+              onClick={() => handleQuickFill("FACULTY", "faculty@university.edu")}
+              className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-left border border-white/5 hover:border-amber-500/30 transition-all flex items-center gap-1.5"
             >
-              🏅 Faculty
+              <span>🏅</span>
+              <span className="font-medium">Faculty</span>
             </button>
             <button
               type="button"
-              onClick={() => {
-                setEmail("tpo.head@institution.edu.in");
-                setRole("TPO_ADMIN");
-              }}
-              className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 text-left border border-white/5"
+              onClick={() => handleQuickFill("INSTITUTION", "admin@nit-campus.edu")}
+              className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-left border border-white/5 hover:border-emerald-500/30 transition-all flex items-center gap-1.5"
             >
-              🏛️ TPO Admin
+              <span>🏛️</span>
+              <span className="font-medium">Institution</span>
             </button>
           </div>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4 pt-2">
+        {/* Error / Success Alerts */}
+        {errorMessage && (
+          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-2.5 text-xs text-rose-300">
+            <AlertCircle size={15} className="shrink-0 mt-0.5 text-rose-400" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-2.5 text-xs text-emerald-300">
+            <CheckCircle2 size={15} className="shrink-0 mt-0.5 text-emerald-400" />
+            <span>{successMessage}</span>
+          </div>
+        )}
+
+        {/* Login Form */}
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Email Address</label>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">Official Email Address</label>
             <div className="relative">
-              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="email"
                 required
+                placeholder="name@organization.edu"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full glass-input pl-9 pr-3 py-2 rounded-xl text-xs"
+                className="w-full glass-input pl-10 pr-3 py-2.5 rounded-xl text-xs"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold text-slate-300">Password</label>
+              <Link href="/forgot-password" className="text-[11px] text-primary-400 hover:text-primary-300 font-medium">
+                Forgot password?
+              </Link>
+            </div>
             <div className="relative">
-              <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="password"
                 required
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full glass-input pl-9 pr-3 py-2 rounded-xl text-xs"
+                className="w-full glass-input pl-10 pr-3 py-2.5 rounded-xl text-xs"
               />
             </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Role</label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full glass-input px-3 py-2 rounded-xl text-xs"
-            >
-              <option value="STUDENT" className="bg-slate-900">Student</option>
-              <option value="RECRUITER" className="bg-slate-900">Industry Recruiter</option>
-              <option value="FACULTY" className="bg-slate-900">Faculty / Mentor</option>
-              <option value="TPO_ADMIN" className="bg-slate-900">TPO / Institutional Admin</option>
-            </select>
           </div>
 
           <Button
@@ -150,14 +169,14 @@ export default function LoginPage() {
             className="w-full mt-2"
             icon={<ArrowRight size={16} />}
           >
-            Sign In to Portal
+            Sign In to Dashboard
           </Button>
         </form>
 
         <div className="text-center pt-2 text-xs text-slate-400 border-t border-white/5">
-          <span>New institutional partner or student? </span>
+          <span>Don't have an account? </span>
           <Link href="/register" className="text-primary-400 font-semibold hover:underline">
-            Register here
+            Register your profile
           </Link>
         </div>
       </Card>

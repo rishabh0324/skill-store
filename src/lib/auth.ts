@@ -1,8 +1,9 @@
 import jwt, { SignOptions } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { UserRole, UserSession } from "@/types";
+import { prisma } from "@/lib/prisma";
 
-const JWT_SECRET = process.env.JWT_SECRET || "sih2026-super-secret-jwt-key-academia-industry";
+const JWT_SECRET = process.env.JWT_SECRET || "sih2026-super-secret-jwt-key-academia-industry-platform";
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = await bcrypt.genSalt(10);
@@ -29,47 +30,61 @@ export function verifyJwtToken(token: string): UserSession | null {
   }
 }
 
-// Preset Demo Accounts for Hackathon Evaluation
-export const DEMO_USERS: Record<UserRole, UserSession> = {
+export async function getUserWithProfile(userId: string): Promise<UserSession | null> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        studentProfile: true,
+        industryProfile: true,
+        facultyProfile: true,
+        institutionProfile: true,
+      },
+    });
+
+    if (!user) return null;
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role as UserRole,
+      avatarUrl: user.avatarUrl || undefined,
+      studentProfile: user.studentProfile || undefined,
+      industryProfile: user.industryProfile || undefined,
+      facultyProfile: user.facultyProfile || undefined,
+      institutionProfile: user.institutionProfile || undefined,
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
+// Preset Demo Profiles
+export const DEMO_PRESETS: Record<UserRole, { email: string; name: string; role: UserRole }> = {
   STUDENT: {
-    id: "user-student-1",
-    email: "aarav.sharma@institution.edu.in",
+    email: "student@sih.edu",
     name: "Aarav Sharma",
     role: "STUDENT",
-    department: "Computer Science & Engineering",
-    institutionName: "National Institute of Technology (NIT)",
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
   },
-  RECRUITER: {
-    id: "user-recruiter-1",
-    email: "priya.nair@microsoft.com",
+  INDUSTRY: {
+    email: "recruiter@techcorp.com",
     name: "Priya Nair",
-    role: "RECRUITER",
-    companyName: "Microsoft India",
-    avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
+    role: "INDUSTRY",
   },
   FACULTY: {
-    id: "user-faculty-1",
-    email: "dr.ramesh@institution.edu.in",
+    email: "faculty@university.edu",
     name: "Dr. Ramesh Verma",
     role: "FACULTY",
-    department: "Computer Science & Engineering",
-    institutionName: "National Institute of Technology (NIT)",
-    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
   },
-  TPO_ADMIN: {
-    id: "user-tpo-1",
-    email: "tpo.head@institution.edu.in",
+  INSTITUTION: {
+    email: "admin@nit-campus.edu",
     name: "Prof. S. Meenakshi",
-    role: "TPO_ADMIN",
-    institutionName: "National Institute of Technology (NIT)",
-    avatarUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
+    role: "INSTITUTION",
   },
   ADMIN: {
-    id: "user-admin-1",
-    email: "admin@sih44-platform.gov.in",
-    name: "System Administrator",
+    email: "admin@sih-platform.gov.in",
+    name: "National Platform Admin",
     role: "ADMIN",
-    avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
   },
 };

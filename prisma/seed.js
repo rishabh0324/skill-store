@@ -4,146 +4,123 @@ const bcrypt = require("bcryptjs");
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Starting Database Seeding for SIH-2026 PS-44...");
+  console.log("🌱 Seeding Phase 2 Users & Profiles for SIH 2026 PS-44...");
 
   const passwordHash = await bcrypt.hash("Password@123", 10);
 
-  // 1. Create Institutions
-  const nit = await prisma.institution.upsert({
-    where: { code: "NIT-01" },
+  // 1. Student User
+  const student = await prisma.user.upsert({
+    where: { email: "student@sih.edu" },
     update: {},
     create: {
-      name: "National Institute of Technology (NIT)",
-      code: "NIT-01",
-      city: "Tiruchirappalli",
-      state: "Tamil Nadu",
-      nirfRank: 9,
-    },
-  });
-
-  // 2. Create Companies
-  const msft = await prisma.company.upsert({
-    where: { id: "comp-msft" },
-    update: {},
-    create: {
-      id: "comp-msft",
-      name: "Microsoft India",
-      website: "https://microsoft.com",
-      logoUrl: "https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=100&auto=format&fit=crop&q=80",
-      domain: "Cloud & Enterprise Software",
-      isVerified: true,
-    },
-  });
-
-  // 3. Create Users & Profiles
-  // Student User
-  const studentUser = await prisma.user.upsert({
-    where: { email: "aarav.sharma@institution.edu.in" },
-    update: {},
-    create: {
-      email: "aarav.sharma@institution.edu.in",
+      email: "student@sih.edu",
       passwordHash,
       name: "Aarav Sharma",
       role: "STUDENT",
       avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
       studentProfile: {
         create: {
-          institutionId: nit.id,
-          rollNo: "CS22B044",
+          collegeName: "National Institute of Technology (NIT)",
+          degree: "B.Tech",
           department: "Computer Science & Engineering",
           graduationYear: 2026,
           cgpa: 8.8,
-          bio: "Full-Stack developer and AI systems enthusiast. Building scalable web architectures and vector databases.",
-          githubUrl: "https://github.com/aarav-sharma",
-          linkedinUrl: "https://linkedin.com/in/aarav-sharma",
-          readinessScore: 92,
+          rollNo: "CS22B044",
+          bio: "Student passionate about Distributed Systems, Full-Stack Next.js, and Vector Databases.",
         },
       },
     },
-    include: { studentProfile: true },
   });
 
-  // Recruiter User
-  await prisma.user.upsert({
-    where: { email: "priya.nair@microsoft.com" },
+  // 2. Industry / Recruiter User
+  const industry = await prisma.user.upsert({
+    where: { email: "recruiter@techcorp.com" },
     update: {},
     create: {
-      email: "priya.nair@microsoft.com",
+      email: "recruiter@techcorp.com",
       passwordHash,
       name: "Priya Nair",
-      role: "RECRUITER",
+      role: "INDUSTRY",
       avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
-      recruiterProfile: {
+      industryProfile: {
         create: {
-          companyId: msft.id,
-          designation: "Principal Technical Recruiter",
+          companyName: "Microsoft India / TechCorp",
+          companyWebsite: "https://techcorp.example.com",
+          designation: "Principal Campus Recruiter",
+          domain: "Cloud & Enterprise Software",
+          isVerified: true,
         },
       },
     },
   });
 
-  // Faculty User
-  await prisma.user.upsert({
-    where: { email: "dr.ramesh@institution.edu.in" },
+  // 3. Faculty / Mentor User
+  const faculty = await prisma.user.upsert({
+    where: { email: "faculty@university.edu" },
     update: {},
     create: {
-      email: "dr.ramesh@institution.edu.in",
+      email: "faculty@university.edu",
       passwordHash,
       name: "Dr. Ramesh Verma",
       role: "FACULTY",
       avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
       facultyProfile: {
         create: {
-          institutionId: nit.id,
+          institutionName: "National Institute of Technology (NIT)",
           department: "Computer Science & Engineering",
           designation: "Associate Professor & Industry Liaison",
-          specialization: "Distributed Systems & Cloud Computing",
+          specialization: "Distributed Systems, Cloud & AI",
         },
       },
     },
   });
 
-  // 4. Create Master Skills
-  const skillsData = [
-    { name: "React.js & Next.js", category: "Technical" },
-    { name: "Python & Fast-API", category: "Technical" },
-    { name: "PostgreSQL & Prisma", category: "Technical" },
-    { name: "Docker & Containerization", category: "Tool" },
-    { name: "Machine Learning (PyTorch)", category: "Domain" },
-    { name: "System Design & Architecture", category: "Technical" },
-  ];
-
-  for (const s of skillsData) {
-    const skill = await prisma.skill.upsert({
-      where: { name: s.name },
-      update: {},
-      create: {
-        name: s.name,
-        category: s.category,
-      },
-    });
-
-    if (studentUser.studentProfile) {
-      await prisma.studentSkill.upsert({
-        where: {
-          studentId_skillId: {
-            studentId: studentUser.studentProfile.id,
-            skillId: skill.id,
-          },
-        },
-        update: {},
+  // 4. Institution Admin User
+  const institution = await prisma.user.upsert({
+    where: { email: "admin@nit-campus.edu" },
+    update: {},
+    create: {
+      email: "admin@nit-campus.edu",
+      passwordHash,
+      name: "Prof. S. Meenakshi",
+      role: "INSTITUTION",
+      avatarUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80",
+      institutionProfile: {
         create: {
-          studentId: studentUser.studentProfile.id,
-          skillId: skill.id,
-          proficiencyLevel: 4,
-          verificationStatus: "ASSESSMENT_VERIFIED",
-          score: 88,
+          institutionName: "National Institute of Technology (NIT)",
+          institutionType: "Tier-1 Institute (IIT/NIT/IIIT)",
+          officialEmail: "admin@nit-campus.edu",
+          website: "https://nit.ac.in",
+          city: "Tiruchirappalli",
+          state: "Tamil Nadu",
+          code: "NIT-01",
+          nirfRank: 9,
         },
-      });
-    }
-  }
+      },
+    },
+  });
 
-  console.log("✅ Database Seeded Successfully!");
+  // 5. System Administrator User
+  const admin = await prisma.user.upsert({
+    where: { email: "admin@sih-platform.gov.in" },
+    update: {},
+    create: {
+      email: "admin@sih-platform.gov.in",
+      passwordHash,
+      name: "National Platform Admin",
+      role: "ADMIN",
+      avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+    },
+  });
+
+  console.log("✅ Phase 2 Seed Completed Successfully!");
+  console.log("-----------------------------------------");
+  console.log("Student:     student@sih.edu        (Password@123)");
+  console.log("Industry:    recruiter@techcorp.com (Password@123)");
+  console.log("Faculty:     faculty@university.edu (Password@123)");
+  console.log("Institution: admin@nit-campus.edu   (Password@123)");
+  console.log("Admin:       admin@sih-platform.gov.in (Password@123)");
+  console.log("-----------------------------------------");
 }
 
 main()

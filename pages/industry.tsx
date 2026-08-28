@@ -5,23 +5,22 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
-  GraduationCap,
+  Briefcase,
   Mail,
+  Globe,
   Building,
-  BookOpen,
-  Calendar,
-  Award,
-  LogOut,
   ShieldCheck,
+  LogOut,
   Sparkles,
+  Users,
 } from "lucide-react";
 
-export default function StudentDashboardPage() {
+export default function IndustryDashboardPage() {
   const { user, logout } = useAuth();
-  const profile = user?.studentProfile;
+  const profile = user?.industryProfile;
 
   return (
-    <AuthGuard allowedRoles={["STUDENT"]}>
+    <AuthGuard allowedRoles={["INDUSTRY"]}>
       <div className="space-y-6 max-w-5xl mx-auto py-4">
         {/* Header Profile Banner */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-6 rounded-3xl border border-white/10 relative overflow-hidden">
@@ -29,23 +28,23 @@ export default function StudentDashboardPage() {
             <img
               src={
                 user?.avatarUrl ||
-                `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.name || "Student")}`
+                `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.name || "Recruiter")}`
               }
               alt={user?.name}
-              className="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-500 shadow-glow"
+              className="w-16 h-16 rounded-2xl object-cover border-2 border-cyan-500 shadow-glow-cyan"
             />
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-extrabold text-white">{user?.name}</h1>
-                <Badge variant="primary" size="md">
-                  <GraduationCap size={13} /> Student Portal
+                <Badge variant="cyan" size="md">
+                  <Briefcase size={13} /> Industry Partner Portal
                 </Badge>
               </div>
               <p className="text-xs text-slate-300 flex items-center gap-2 mt-1">
                 <span className="flex items-center gap-1"><Mail size={12} className="text-slate-400" /> {user?.email}</span>
                 <span>•</span>
                 <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                  <ShieldCheck size={12} /> Active Authenticated Session
+                  <ShieldCheck size={12} /> Verified Corporate Partner
                 </span>
               </p>
             </div>
@@ -56,52 +55,58 @@ export default function StudentDashboardPage() {
           </Button>
         </div>
 
-        {/* Profile Details Card */}
+        {/* Corporate Details */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="p-5 space-y-2 border border-white/5">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Building size={14} className="text-indigo-400" /> Institution / College
+              <Building size={14} className="text-cyan-400" /> Company / Organization
             </span>
             <h3 className="text-base font-bold text-white">
-              {profile?.collegeName || "National Institute of Technology"}
+              {profile?.companyName || "Microsoft India / TechCorp"}
             </h3>
-            <p className="text-xs text-slate-400">Affiliated Campus Cohort</p>
+            <p className="text-xs text-slate-400">{profile?.domain || "Software & Cloud Systems"}</p>
           </Card>
 
           <Card className="p-5 space-y-2 border border-white/5">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <BookOpen size={14} className="text-cyan-400" /> Program & Branch
+              <Globe size={14} className="text-indigo-400" /> Company Website
             </span>
-            <h3 className="text-base font-bold text-white">
-              {profile?.degree || "B.Tech"} - {profile?.department || "Computer Science"}
-            </h3>
-            <p className="text-xs text-slate-400">Outcome-Based Education (OBE)</p>
+            <a
+              href={profile?.companyWebsite || "https://example.com"}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm font-bold text-accent-cyan hover:underline truncate block"
+            >
+              {profile?.companyWebsite || "https://example.com"}
+            </a>
+            <p className="text-xs text-slate-400">Verified Corporate URL</p>
           </Card>
 
           <Card className="p-5 space-y-2 border border-white/5">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Calendar size={14} className="text-amber-400" /> Graduating Year
+              <Users size={14} className="text-emerald-400" /> Recruiter Designation
             </span>
-            <h3 className="text-base font-bold text-white">Class of {profile?.graduationYear || 2026}</h3>
-            <p className="text-xs text-slate-400">Placement Cycle 2025–26</p>
+            <h3 className="text-base font-bold text-white">
+              {profile?.designation || "Principal Technical Recruiter"}
+            </h3>
+            <p className="text-xs text-slate-400">Campus Talent Acquisition</p>
           </Card>
         </div>
 
-        {/* Phase 2 Role Placeholder Notice */}
-        <Card className="p-6 rounded-2xl border border-indigo-500/20 bg-indigo-950/10 space-y-3">
+        {/* Phase 2 Status Notice */}
+        <Card className="p-6 rounded-2xl border border-cyan-500/20 bg-cyan-950/10 space-y-3">
           <div className="flex items-center gap-2">
             <Sparkles className="text-accent-cyan w-5 h-5" />
-            <h3 className="text-base font-bold text-white">Phase 2: Authentication & RBAC Complete</h3>
+            <h3 className="text-base font-bold text-white">Phase 2: Authentication & Role Verification Active</h3>
           </div>
           <p className="text-xs text-slate-300 leading-relaxed">
-            Your user identity, role-based session cookie, and student profile have been securely verified against the database.
-            In upcoming phases, this dashboard will be populated with live adaptive skill testing, AI vector gap analysis, and 1-click recruiter applications.
+            Your Industry recruiter session is authenticated and isolated. In subsequent phases, this dashboard will host the full skill-weighted job posting engine, ATS pipeline Kanban, and sub-50ms candidate vector matching.
           </p>
           <div className="pt-2 flex items-center gap-2 text-xs text-slate-400">
-            <span className="font-semibold text-slate-200">Current Role:</span>
-            <Badge variant="primary" size="sm">STUDENT</Badge>
+            <span className="font-semibold text-slate-200">Authenticated Role:</span>
+            <Badge variant="cyan" size="sm">INDUSTRY</Badge>
             <span>•</span>
-            <span className="font-semibold text-slate-200">User ID:</span>
+            <span className="font-semibold text-slate-200">Account ID:</span>
             <span className="font-mono text-[11px] text-slate-300">{user?.id}</span>
           </div>
         </Card>

@@ -1,43 +1,54 @@
-"use client";
-
 import React, { useState } from "react";
+import { CandidateItem } from "@/types";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { CandidateItem } from "@/types";
 import {
-  Users,
-  Search,
-  SlidersHorizontal,
-  ChevronRight,
-  Mail,
-  GraduationCap,
-  Sparkles,
   CheckCircle,
+  Clock,
+  ArrowRight,
+  ExternalLink,
+  Search,
+  Filter,
+  UserCheck,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface CandidatesPipelineProps {
-  initialCandidates: CandidateItem[];
+  candidates: CandidateItem[];
 }
 
-export const CandidatesPipeline: React.FC<CandidatesPipelineProps> = ({ initialCandidates }) => {
-  const [candidates, setCandidates] = useState<CandidateItem[]>(initialCandidates);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeFilter, setActiveFilter] = useState<string>("ALL");
+const STAGES = [
+  { id: "all", label: "All Applicants" },
+  { id: "applied", label: "Applied" },
+  { id: "review", label: "Under Review" },
+  { id: "shortlisted", label: "Shortlisted" },
+  { id: "interview", label: "Interview" },
+  { id: "offered", label: "Offered" },
+];
 
-  const handleAdvanceStatus = (candidateId: string) => {
+export const CandidatesPipeline: React.FC<CandidatesPipelineProps> = ({
+  candidates: initialCandidates,
+}) => {
+  const [candidates, setCandidates] = useState<CandidateItem[]>(initialCandidates);
+  const [activeStage, setActiveStage] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const advanceStage = (id: string) => {
     setCandidates((prev) =>
       prev.map((c) => {
-        if (c.id === candidateId) {
-          const nextStatus: Record<string, CandidateItem["status"]> = {
-            APPLIED: "UNDER_REVIEW",
-            UNDER_REVIEW: "SHORTLISTED",
-            SHORTLISTED: "INTERVIEW_SCHEDULED",
-            INTERVIEW_SCHEDULED: "OFFERED",
-            OFFERED: "OFFERED",
-          };
-          return { ...c, status: nextStatus[c.status] || "OFFERED" };
+        if (c.id === id) {
+          const nextStatus =
+            c.status.toLowerCase() === "applied"
+              ? "review"
+              : c.status.toLowerCase() === "review"
+              ? "shortlisted"
+              : c.status.toLowerCase() === "shortlisted"
+              ? "interview"
+              : c.status.toLowerCase() === "interview"
+              ? "offered"
+              : c.status;
+          return { ...c, status: nextStatus };
         }
         return c;
       })
@@ -45,129 +56,151 @@ export const CandidatesPipeline: React.FC<CandidatesPipelineProps> = ({ initialC
   };
 
   const filteredCandidates = candidates.filter((c) => {
+    const matchesStage =
+      activeStage === "all" ||
+      c.status.toLowerCase() === activeStage.toLowerCase();
     const matchesSearch =
-      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.department.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = activeFilter === "ALL" || c.status === activeFilter;
-    return matchesSearch && matchesFilter;
+      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.department || "").toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStage && matchesSearch;
   });
 
   return (
-    <Card className="h-full">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+    <Card className="p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-base font-bold text-white">AI-Ranked Candidate Pipeline</h3>
-            <Badge variant="cyan" size="sm">
-              <Sparkles size={11} /> Vector Matched
-            </Badge>
-          </div>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Candidates ranked by skill overlap, verified assessment performance, and academic criteria.
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <UserCheck className="text-accent-cyan" size={20} />
+            AI-Ranked Applicant Pipeline
+          </h3>
+          <p className="text-xs text-slate-400">
+            Ranked by multi-factor cosine vector similarity matching your job skill weights.
           </p>
         </div>
 
-        {/* Filter Badges */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-          {["ALL", "SHORTLISTED", "UNDER_REVIEW", "APPLIED"].map((f) => (
-            <button
-              key={f}
-              onClick={() => setActiveFilter(f)}
-              className={cn(
-                "text-xs px-2.5 py-1 rounded-lg font-medium transition-colors shrink-0",
-                activeFilter === f
-                  ? "bg-primary-500 text-white"
-                  : "bg-white/5 text-slate-300 hover:bg-white/10"
-              )}
-            >
-              {f.replace("_", " ")}
-            </button>
-          ))}
+        {/* Search */}
+        <div className="relative min-w-[240px]">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search candidates or skills..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full glass-input pl-9 pr-3 py-1.5 rounded-xl text-xs"
+          />
         </div>
       </div>
 
-      <div className="relative mb-4">
-        <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-        <input
-          type="text"
-          placeholder="Search candidates by name, skill, or department..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full glass-input pl-10 pr-4 py-2 rounded-xl text-xs"
-        />
+      {/* Pipeline Tabs */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-white/5 scrollbar-none">
+        {STAGES.map((stage) => {
+          const count =
+            stage.id === "all"
+              ? candidates.length
+              : candidates.filter(
+                  (c) => c.status.toLowerCase() === stage.id.toLowerCase()
+                ).length;
+          return (
+            <button
+              key={stage.id}
+              onClick={() => setActiveStage(stage.id)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                activeStage === stage.id
+                  ? "bg-primary-500 text-white shadow-glow"
+                  : "text-slate-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <span>{stage.label}</span>
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/30">
+                {count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
+      {/* Candidate List */}
       <div className="space-y-3">
-        {filteredCandidates.map((cand) => (
-          <div
-            key={cand.id}
-            className="p-4 rounded-xl glass-card border border-white/5 hover:border-white/15 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
-          >
-            <div className="flex items-start gap-3.5">
-              <img
-                src={cand.avatarUrl}
-                alt={cand.name}
-                className="w-11 h-11 rounded-xl object-cover border border-white/10 shrink-0"
-              />
-              <div>
-                <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-bold text-white group-hover:text-primary-300 transition-colors">
-                    {cand.name}
-                  </h4>
-                  <Badge
-                    variant={
-                      cand.matchScore >= 90 ? "success" : cand.matchScore >= 80 ? "cyan" : "warning"
+        {filteredCandidates.length === 0 ? (
+          <div className="text-center py-10 text-slate-500 text-xs">
+            No candidates in this pipeline stage.
+          </div>
+        ) : (
+          filteredCandidates.map((cand) => {
+            const score = cand.matchScore || cand.vectorMatchScore || 85;
+            return (
+              <div
+                key={cand.id}
+                className="p-4 rounded-2xl glass-card border border-white/5 hover:border-primary-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all"
+              >
+                <div className="flex items-start gap-3.5">
+                  <img
+                    src={
+                      cand.avatarUrl ||
+                      `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cand.name)}`
                     }
-                    size="sm"
-                  >
-                    {cand.matchScore}% Match
-                  </Badge>
-                </div>
-                <p className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
-                  <span>{cand.department}</span>
-                  <span>•</span>
-                  <span className="text-slate-300 font-semibold">CGPA: {cand.cgpa}</span>
-                </p>
+                    alt={cand.name}
+                    className="w-11 h-11 rounded-xl object-cover border border-white/10"
+                  />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm font-bold text-white hover:text-primary-300 transition-colors">
+                        {cand.name}
+                      </h4>
+                      <Badge
+                        variant={
+                          score >= 90 ? "success" : score >= 80 ? "cyan" : "warning"
+                        }
+                        size="sm"
+                      >
+                        {score}% Match
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
+                      <span>{cand.department || cand.degree}</span>
+                      <span>•</span>
+                      <span className="text-slate-300 font-semibold">CGPA: {cand.cgpa}</span>
+                    </p>
 
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {cand.skills.map((s, i) => (
-                    <span
-                      key={i}
-                      className="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/5 text-slate-300 flex items-center gap-1"
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {(cand.skills || cand.verifiedSkills || []).map((s: any, i: number) => {
+                        const skillName = typeof s === "string" ? s : s?.name || "Skill";
+                        const isVerified = typeof s === "object" ? s?.verified : true;
+                        return (
+                          <span
+                            key={i}
+                            className="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/5 text-slate-300 flex items-center gap-1"
+                          >
+                            {skillName}
+                            {isVerified && <CheckCircle size={10} className="text-emerald-400" />}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 self-end md:self-center">
+                  <Link href={`/p/${cand.name.toLowerCase().replace(/\s+/g, "-")}`}>
+                    <Button variant="ghost" size="sm" icon={<ExternalLink size={13} />}>
+                      Verified Portfolio
+                    </Button>
+                  </Link>
+                  {cand.status.toLowerCase() !== "offered" && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => advanceStage(cand.id)}
+                      icon={<ArrowRight size={13} />}
                     >
-                      {s.name}
-                      {s.verified && <CheckCircle size={10} className="text-emerald-400" />}
-                    </span>
-                  ))}
+                      Advance
+                    </Button>
+                  )}
                 </div>
               </div>
-            </div>
-
-            <div className="flex items-center gap-2.5 self-end sm:self-center shrink-0">
-              <Badge
-                variant={
-                  cand.status === "SHORTLISTED"
-                    ? "success"
-                    : cand.status === "UNDER_REVIEW"
-                    ? "warning"
-                    : "neutral"
-                }
-                size="md"
-              >
-                {cand.status.replace("_", " ")}
-              </Badge>
-
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => handleAdvanceStatus(cand.id)}
-                icon={<ChevronRight size={14} />}
-              >
-                Advance
-              </Button>
-            </div>
-          </div>
-        ))}
+            );
+          })
+        )}
       </div>
     </Card>
   );

@@ -1,102 +1,101 @@
 import React, { useState } from "react";
-import { MetricCard } from "@/components/shared/MetricCard";
+import { AuthGuard } from "@/components/shared/AuthGuard";
 import { CandidatesPipeline } from "@/components/recruiter/CandidatesPipeline";
 import { JobListingTable } from "@/components/recruiter/JobListingTable";
 import { PostJobModal } from "@/components/recruiter/PostJobModal";
-import { MOCK_CANDIDATES, MOCK_JOBS } from "@/lib/mockData";
-import { Users, Briefcase, Plus, CheckCircle2, Sparkles } from "lucide-react";
+import { MetricCard } from "@/components/shared/MetricCard";
 import { Button } from "@/components/ui/Button";
+import {
+  Users,
+  Briefcase,
+  TrendingUp,
+  Plus,
+  Building,
+} from "lucide-react";
+import { MOCK_JOB_POSTINGS, MOCK_CANDIDATES } from "@/lib/mockData";
+import { JobPostingItem } from "@/types";
 
-export default function RecruiterPage() {
-  const [jobs, setJobs] = useState(MOCK_JOBS);
-  const [isPostOpen, setIsPostOpen] = useState(false);
+export default function RecruiterDashboardPage() {
+  const [jobs, setJobs] = useState<JobPostingItem[]>(MOCK_JOB_POSTINGS);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
 
-  const handleJobCreated = (newJob: any) => {
-    setJobs([newJob, ...jobs]);
+  const handleCreateJob = (newJob: JobPostingItem) => {
+    setJobs((prev) => [newJob, ...prev]);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-5 rounded-2xl border border-white/10">
-        <div className="flex items-center gap-3.5">
-          <img
-            src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80"
-            alt="Priya Nair"
-            className="w-12 h-12 rounded-xl object-cover border-2 border-cyan-500/50 shadow-glow-cyan"
-          />
+    <AuthGuard allowedRoles={["INDUSTRY", "ADMIN"]}>
+      <div className="space-y-6">
+        {/* Recruiter Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-6 rounded-3xl border border-white/10">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-white">Priya Nair</h2>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                Microsoft India
+              <span className="px-2 py-0.5 rounded-full bg-accent-cyan/10 text-accent-cyan text-xs font-semibold border border-accent-cyan/20">
+                Corporate Recruiting Portal
               </span>
+              <span className="text-xs text-slate-400">Microsoft India / TechCorp</span>
             </div>
-            <p className="text-xs text-slate-400">
-              Principal Technical Recruiter • Campus Talent Acquisition Lead
+            <h2 className="text-2xl font-black text-white mt-1">Campus Talent Acquisition Desk</h2>
+            <p className="text-xs text-slate-300">
+              Zero-latency vector competency matching with multi-factor weighted proficiency ranking.
             </p>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2.5">
           <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setIsPostOpen(true)}
-            icon={<Plus size={14} />}
+            variant="primary"
+            size="md"
+            onClick={() => setIsPostModalOpen(true)}
+            icon={<Plus size={16} />}
           >
             Post Industry Opening
           </Button>
         </div>
-      </div>
 
-      {/* Recruiter Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          title="Active Drives"
-          value={jobs.length}
-          subtext="2 Internships, 1 FTE"
-          icon={<Briefcase size={18} />}
-          iconBg="bg-cyan-500/15 text-cyan-400 border border-cyan-500/30"
-        />
-        <MetricCard
-          title="Total Applicants"
-          value="84"
-          trend={{ value: "+24 today", positive: true }}
-          icon={<Users size={18} />}
-          iconBg="bg-indigo-500/15 text-indigo-400 border border-indigo-500/30"
-        />
-        <MetricCard
-          title="Shortlisted Talent"
-          value="18"
-          subtext="Top Tier Vector Fit"
-          icon={<Sparkles size={18} />}
-          iconBg="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-        />
-        <MetricCard
-          title="Offers Released"
-          value="6"
-          subtext="Acceptance rate: 100%"
-          icon={<CheckCircle2 size={18} />}
-          iconBg="bg-amber-500/15 text-amber-400 border border-amber-500/30"
-        />
-      </div>
-
-      {/* Main Grid: Pipeline and Job Listings */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7">
-          <CandidatesPipeline initialCandidates={MOCK_CANDIDATES} />
+        {/* Recruiter Metrics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <MetricCard
+            title="Active Drives"
+            value={jobs.length}
+            subtext="3 Technical Internships"
+            icon={<Briefcase size={18} />}
+            iconBg="bg-indigo-500/15 text-indigo-400 border border-indigo-500/30"
+          />
+          <MetricCard
+            title="Total Applicants"
+            value="142"
+            trend={{ value: "+18 today", positive: true }}
+            icon={<Users size={18} />}
+            iconBg="bg-cyan-500/15 text-cyan-400 border border-cyan-500/30"
+          />
+          <MetricCard
+            title="Top Vector Fit (>90%)"
+            value="28"
+            trend={{ value: "High Competency Fit", positive: true }}
+            icon={<TrendingUp size={18} />}
+            iconBg="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+          />
+          <MetricCard
+            title="Shortlisted Pipeline"
+            value="12"
+            subtext="Ready for Tech Interview"
+            icon={<Building size={18} />}
+            iconBg="bg-amber-500/15 text-amber-400 border border-amber-500/30"
+          />
         </div>
-        <div className="lg:col-span-5">
-          <JobListingTable jobs={jobs} />
-        </div>
-      </div>
 
-      <PostJobModal
-        isOpen={isPostOpen}
-        onClose={() => setIsPostOpen(false)}
-        onJobCreated={handleJobCreated}
-      />
-    </div>
+        {/* ATS Candidates Pipeline */}
+        <CandidatesPipeline candidates={MOCK_CANDIDATES} />
+
+        {/* Job Drives Table */}
+        <JobListingTable jobs={jobs} />
+
+        {/* Post Job Modal */}
+        <PostJobModal
+          isOpen={isPostModalOpen}
+          onClose={() => setIsPostModalOpen(false)}
+          onJobCreated={handleCreateJob}
+        />
+      </div>
+    </AuthGuard>
   );
 }

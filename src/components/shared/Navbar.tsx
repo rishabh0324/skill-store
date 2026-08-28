@@ -1,12 +1,45 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useAuth } from "@/context/AuthContext";
 import { RoleSwitcher } from "./RoleSwitcher";
-import { NotificationDropdown } from "./NotificationDropdown";
-import { Sparkles, Layers, ShieldCheck } from "lucide-react";
+import {
+  Layers,
+  LogOut,
+  User,
+  LayoutDashboard,
+  LogIn,
+  UserPlus,
+  ShieldCheck,
+  ChevronDown,
+} from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 
 export const Navbar: React.FC = () => {
+  const { user, isAuthenticated, logout, getDashboardRouteForRole } = useAuth();
+  const router = useRouter();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case "STUDENT":
+        return "primary";
+      case "INDUSTRY":
+        return "cyan";
+      case "FACULTY":
+        return "warning";
+      case "INSTITUTION":
+        return "success";
+      case "ADMIN":
+        return "purple";
+      default:
+        return "neutral";
+    }
+  };
+
   return (
     <header className="sticky top-0 z-30 w-full glass-panel border-b border-white/10 px-4 lg:px-8 py-3 transition-all">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -26,23 +59,87 @@ export const Navbar: React.FC = () => {
                 SIH'26
               </span>
             </div>
-            <p className="text-[10px] text-slate-400 font-medium">Academia–Industry Collaboration Engine</p>
+            <p className="text-[10px] text-slate-400 font-medium">Academia–Industry Collaboration Platform</p>
           </div>
         </Link>
 
-        {/* Action Controls & Role Switcher */}
+        {/* Action Controls */}
         <div className="flex items-center gap-3">
+          {/* Quick Demo Role Switcher for Hackathon Evaluation */}
           <RoleSwitcher />
-          <NotificationDropdown />
 
-          <Link
-            href="/p/aarav-sharma"
-            target="_blank"
-            className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-accent-cyan/10 hover:bg-accent-cyan/20 text-cyan-300 border border-cyan-500/30 transition-colors"
-          >
-            <ShieldCheck size={14} />
-            <span>Public Portfolio</span>
-          </Link>
+          {isAuthenticated && user ? (
+            <div className="relative">
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center gap-2.5 p-1.5 pr-3 rounded-xl glass-card border border-white/10 text-xs text-slate-200 hover:border-primary-400/50 transition-all"
+              >
+                <img
+                  src={
+                    user.avatarUrl ||
+                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name)}`
+                  }
+                  alt={user.name}
+                  className="w-7 h-7 rounded-lg object-cover border border-white/10"
+                />
+                <div className="text-left hidden sm:block">
+                  <p className="font-bold text-white text-xs leading-none">{user.name}</p>
+                  <span className="text-[10px] text-slate-400 capitalize">{user.role.toLowerCase()}</span>
+                </div>
+                <ChevronDown size={14} className="text-slate-400" />
+              </button>
+
+              {userMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+                  <div className="absolute right-0 mt-2 w-56 glass-panel rounded-2xl p-2 shadow-2xl z-50 border border-white/15 animate-in fade-in zoom-in-95 duration-150 space-y-1">
+                    <div className="px-3 py-2 border-b border-white/10 mb-1">
+                      <p className="font-bold text-white text-xs">{user.name}</p>
+                      <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
+                      <div className="mt-1.5">
+                        <Badge variant={getRoleBadgeVariant(user.role)} size="sm">
+                          {user.role}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <Link
+                      href={getDashboardRouteForRole(user.role)}
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-slate-200 hover:bg-white/10 hover:text-white transition-colors"
+                    >
+                      <LayoutDashboard size={14} className="text-primary-400" />
+                      <span>My Dashboard</span>
+                    </Link>
+
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        logout();
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-left"
+                    >
+                      <LogOut size={14} />
+                      <span>Log Out</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link href="/login">
+                <Button variant="ghost" size="sm" icon={<LogIn size={14} />}>
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/register">
+                <Button variant="primary" size="sm" icon={<UserPlus size={14} />}>
+                  Register
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </header>

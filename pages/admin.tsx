@@ -5,23 +5,21 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
-  GraduationCap,
+  Shield,
   Mail,
+  Users,
   Building,
-  BookOpen,
-  Calendar,
-  Award,
-  LogOut,
+  Key,
   ShieldCheck,
+  LogOut,
   Sparkles,
 } from "lucide-react";
 
-export default function StudentDashboardPage() {
+export default function AdminDashboardPage() {
   const { user, logout } = useAuth();
-  const profile = user?.studentProfile;
 
   return (
-    <AuthGuard allowedRoles={["STUDENT"]}>
+    <AuthGuard allowedRoles={["ADMIN"]}>
       <div className="space-y-6 max-w-5xl mx-auto py-4">
         {/* Header Profile Banner */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-6 rounded-3xl border border-white/10 relative overflow-hidden">
@@ -29,23 +27,23 @@ export default function StudentDashboardPage() {
             <img
               src={
                 user?.avatarUrl ||
-                `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.name || "Student")}`
+                `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user?.name || "Admin")}`
               }
               alt={user?.name}
-              className="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-500 shadow-glow"
+              className="w-16 h-16 rounded-2xl object-cover border-2 border-purple-500"
             />
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-extrabold text-white">{user?.name}</h1>
-                <Badge variant="primary" size="md">
-                  <GraduationCap size={13} /> Student Portal
+                <Badge variant="purple" size="md">
+                  <Shield size={13} /> System Administrator
                 </Badge>
               </div>
               <p className="text-xs text-slate-300 flex items-center gap-2 mt-1">
                 <span className="flex items-center gap-1"><Mail size={12} className="text-slate-400" /> {user?.email}</span>
                 <span>•</span>
                 <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                  <ShieldCheck size={12} /> Active Authenticated Session
+                  <ShieldCheck size={12} /> Root Security Clearance
                 </span>
               </p>
             </div>
@@ -56,52 +54,47 @@ export default function StudentDashboardPage() {
           </Button>
         </div>
 
-        {/* Profile Details Card */}
+        {/* System Administration Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="p-5 space-y-2 border border-white/5">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Building size={14} className="text-indigo-400" /> Institution / College
+              <Users size={14} className="text-purple-400" /> Managed Roles
             </span>
-            <h3 className="text-base font-bold text-white">
-              {profile?.collegeName || "National Institute of Technology"}
-            </h3>
-            <p className="text-xs text-slate-400">Affiliated Campus Cohort</p>
+            <h3 className="text-base font-bold text-white">4 Primary Stakeholders</h3>
+            <p className="text-xs text-slate-400">Student, Industry, Faculty, Institution</p>
           </Card>
 
           <Card className="p-5 space-y-2 border border-white/5">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <BookOpen size={14} className="text-cyan-400" /> Program & Branch
+              <Key size={14} className="text-cyan-400" /> Security Protocol
             </span>
-            <h3 className="text-base font-bold text-white">
-              {profile?.degree || "B.Tech"} - {profile?.department || "Computer Science"}
-            </h3>
-            <p className="text-xs text-slate-400">Outcome-Based Education (OBE)</p>
+            <h3 className="text-base font-bold text-white">JWT + Bcrypt (Salt: 10)</h3>
+            <p className="text-xs text-slate-400">HTTP-Only SameSite Cookie</p>
           </Card>
 
           <Card className="p-5 space-y-2 border border-white/5">
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Calendar size={14} className="text-amber-400" /> Graduating Year
+              <Building size={14} className="text-emerald-400" /> Database Status
             </span>
-            <h3 className="text-base font-bold text-white">Class of {profile?.graduationYear || 2026}</h3>
-            <p className="text-xs text-slate-400">Placement Cycle 2025–26</p>
+            <h3 className="text-base font-bold text-white">Prisma Client Synchronized</h3>
+            <p className="text-xs text-slate-400">SQLite / PostgreSQL Ready</p>
           </Card>
         </div>
 
-        {/* Phase 2 Role Placeholder Notice */}
-        <Card className="p-6 rounded-2xl border border-indigo-500/20 bg-indigo-950/10 space-y-3">
+        {/* Phase 2 Status Notice */}
+        <Card className="p-6 rounded-2xl border border-purple-500/20 bg-purple-950/10 space-y-3">
           <div className="flex items-center gap-2">
             <Sparkles className="text-accent-cyan w-5 h-5" />
-            <h3 className="text-base font-bold text-white">Phase 2: Authentication & RBAC Complete</h3>
+            <h3 className="text-base font-bold text-white">Phase 2: Master Governance & RBAC Foundation Complete</h3>
           </div>
           <p className="text-xs text-slate-300 leading-relaxed">
-            Your user identity, role-based session cookie, and student profile have been securely verified against the database.
-            In upcoming phases, this dashboard will be populated with live adaptive skill testing, AI vector gap analysis, and 1-click recruiter applications.
+            All user authentication endpoints, role verification guards, and profile entity mappings are functioning securely. Platform administrators have system-wide authority across user records and audit logs.
           </p>
           <div className="pt-2 flex items-center gap-2 text-xs text-slate-400">
-            <span className="font-semibold text-slate-200">Current Role:</span>
-            <Badge variant="primary" size="sm">STUDENT</Badge>
+            <span className="font-semibold text-slate-200">Active Role:</span>
+            <Badge variant="purple" size="sm">ADMIN</Badge>
             <span>•</span>
-            <span className="font-semibold text-slate-200">User ID:</span>
+            <span className="font-semibold text-slate-200">Account ID:</span>
             <span className="font-mono text-[11px] text-slate-300">{user?.id}</span>
           </div>
         </Card>

@@ -1,123 +1,259 @@
-export type UserRole = "STUDENT" | "RECRUITER" | "FACULTY" | "TPO_ADMIN" | "ADMIN";
+export type UserRole = "STUDENT" | "INDUSTRY" | "FACULTY" | "INSTITUTION" | "ADMIN";
+
+export interface StudentProfileData {
+  id?: string;
+  userId?: string;
+  collegeName: string;
+  degree: string;
+  department: string;
+  graduationYear: number;
+  cgpa?: number | null;
+  rollNo?: string | null;
+  bio?: string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+  [key: string]: any;
+}
+
+export interface IndustryProfileData {
+  id?: string;
+  userId?: string;
+  companyName: string;
+  companyWebsite: string;
+  designation?: string | null;
+  domain?: string | null;
+  isVerified?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  [key: string]: any;
+}
+
+export interface FacultyProfileData {
+  id?: string;
+  userId?: string;
+  institutionName: string;
+  department: string;
+  designation: string;
+  specialization?: string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+  [key: string]: any;
+}
+
+export interface InstitutionProfileData {
+  id?: string;
+  userId?: string;
+  institutionName: string;
+  institutionType: string;
+  officialEmail?: string | null;
+  website?: string | null;
+  city?: string | null;
+  state?: string | null;
+  code?: string | null;
+  nirfRank?: number | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+  [key: string]: any;
+}
 
 export interface UserSession {
   id: string;
   email: string;
   name: string;
   role: UserRole;
-  avatarUrl?: string;
-  profileId?: string;
-  department?: string;
-  institutionName?: string;
-  companyName?: string;
+  avatarUrl?: string | null;
+  studentProfile?: StudentProfileData | null;
+  industryProfile?: IndustryProfileData | null;
+  facultyProfile?: FacultyProfileData | null;
+  institutionProfile?: InstitutionProfileData | null;
+  [key: string]: any;
 }
 
-export type VerificationStatus = "SELF_REPORTED" | "ASSESSMENT_VERIFIED" | "FACULTY_ENDORSED";
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    user: UserSession;
+    token?: string;
+  };
+  errors?: any;
+}
 
+export interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  collegeName?: string;
+  degree?: string;
+  department?: string;
+  graduationYear?: number;
+  companyName?: string;
+  companyWebsite?: string;
+  institutionName?: string;
+  designation?: string;
+  institutionType?: string;
+  [key: string]: any;
+}
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+  [key: string]: any;
+}
+
+// Domain Model Types for Platform Services
 export interface SkillItem {
   id: string;
   name: string;
-  category: "Technical" | "Soft" | "Domain" | "Tool";
+  category?: string;
   description?: string;
-  proficiencyLevel: number; // 1 to 5
-  verificationStatus: VerificationStatus;
   score?: number;
-  lastAssessedAt?: string;
+  proficiencyLevel?: any;
+  verificationStatus?: string;
+  selfScore?: number;
+  verifiedScore?: number;
+  industryBenchmark?: number;
+  isVerified?: boolean;
+  badgeEarned?: string;
+  [key: string]: any;
 }
 
 export interface AssessmentItem {
   id: string;
-  skillName: string;
   title: string;
-  durationMins: number;
-  difficultyLevel: "Beginner" | "Intermediate" | "Advanced";
-  passingScore: number;
+  skillName: string;
+  category?: string;
+  difficulty?: string;
+  difficultyLevel?: string;
+  durationMinutes?: number;
+  durationMins?: number;
   totalQuestions: number;
-  isCompleted?: boolean;
+  passingScore: number;
+  badgeReward?: string;
+  status?: string;
   score?: number;
+  isCompleted?: boolean;
+  bestScore?: number;
+  questions?: {
+    id: string;
+    text: string;
+    options: string[];
+    correctIndex: number;
+  }[];
+  [key: string]: any;
 }
 
 export interface RoadmapStep {
   id: string;
-  stepNumber: number;
+  stepNumber?: number;
+  week?: number;
   title: string;
   description: string;
-  resourceType: "VIDEO" | "ARTICLE" | "PROJECT" | "QUIZ" | "CERT";
-  resourceUrl?: string;
+  resourceType: string;
+  resourceUrl: string;
+  estimatedHours?: number;
   isCompleted: boolean;
+  [key: string]: any;
 }
 
 export interface LearningRoadmapData {
   id: string;
   targetRole: string;
-  gapSummary: string;
-  estimatedHours: number;
-  progressPercent: number;
+  estimatedWeeks?: number;
+  estimatedHours?: number;
+  summary?: string;
+  gapSummary?: string;
+  progressPercent?: number;
   steps: RoadmapStep[];
+  [key: string]: any;
 }
 
 export interface JobPostingItem {
   id: string;
+  title: string;
   companyName: string;
   companyLogo?: string;
-  title: string;
-  type: "INTERNSHIP" | "FULL_TIME" | "APPRENTICESHIP";
   location: string;
-  stipendSalary: string;
-  deadline: string;
-  status: "OPEN" | "CLOSED";
+  type: string;
+  status?: string;
+  stipendOrSalary?: string;
+  stipendSalary?: string;
   minCgpa: number;
-  matchScore: number;
-  description: string;
-  requiredSkills: { name: string; weight: number; isMandatory: boolean }[];
-  applicationStatus?: "APPLIED" | "UNDER_REVIEW" | "SHORTLISTED" | "INTERVIEW_SCHEDULED" | "OFFERED" | "REJECTED";
+  deadline: string;
+  requiredSkills: {
+    name?: string;
+    skillName?: string;
+    weight: number;
+    isMandatory?: boolean;
+    [key: string]: any;
+  }[];
+  vectorMatchScore?: number;
+  matchScore?: number;
+  applicationStatus?: string;
+  [key: string]: any;
 }
 
 export interface CandidateItem {
   id: string;
-  studentId: string;
+  studentId?: string;
   name: string;
   email: string;
-  department: string;
+  collegeName?: string;
+  degree?: string;
+  department?: string;
   cgpa: number;
-  readinessScore: number;
-  matchScore: number;
   avatarUrl?: string;
-  skills: { name: string; level: number; verified: boolean }[];
-  status: "APPLIED" | "UNDER_REVIEW" | "SHORTLISTED" | "INTERVIEW_SCHEDULED" | "OFFERED" | "REJECTED";
+  vectorMatchScore?: number;
+  matchScore?: number;
+  verifiedSkills?: any[];
+  skills?: any[];
+  status: string;
   appliedAt: string;
+  [key: string]: any;
 }
 
 export interface MentorshipSessionItem {
   id: string;
-  facultyName: string;
   studentName: string;
+  studentEmail?: string;
+  studentAvatar?: string;
+  facultyName?: string;
   topic: string;
   scheduledAt: string;
+  durationMinutes?: number;
+  status: string;
   meetingLink?: string;
-  status: "REQUESTED" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
   notes?: string;
+  [key: string]: any;
 }
 
 export interface InstitutionAnalytics {
   totalStudents: number;
-  placementReadyPercentage: number;
-  averageSkillScore: number;
-  activeRecruiters: number;
-  totalOffers: number;
-  departmentReadiness: {
+  verifiedSkillsCount?: number;
+  industryPartnersCount?: number;
+  averageReadinessScore?: number;
+  placementRateProjected?: number;
+  placementReadyPercentage?: number;
+  activeRecruiters?: number;
+  totalOffers?: number;
+  skillDemandVsSupply?: any;
+  departmentReadiness?: {
     department: string;
-    total: number;
-    ready: number;
-    avgScore: number;
+    total?: number;
+    ready?: number;
+    avgScore?: number;
+    totalStudents?: number;
+    readinessPercentage?: number;
+    readinessScore?: number;
+    tier1Count?: number;
+    [key: string]: any;
   }[];
-  skillDemandVsSupply: {
+  skillSupplyVsDemand?: {
     skill: string;
     industryDemand: number;
     studentSupply: number;
+    [key: string]: any;
   }[];
-  placementFunnel: {
-    stage: string;
-    count: number;
-  }[];
+  [key: string]: any;
 }

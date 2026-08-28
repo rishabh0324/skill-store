@@ -1,137 +1,158 @@
-"use client";
-
 import React, { useState } from "react";
+import { LearningRoadmapData } from "@/types";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { Progress } from "@/components/ui/Progress";
 import { Button } from "@/components/ui/Button";
-import { LearningRoadmapData, RoadmapStep } from "@/types";
+import { Progress } from "@/components/ui/Progress";
 import {
-  Compass,
   CheckCircle2,
   Circle,
+  ExternalLink,
+  BookOpen,
   Video,
-  FileText,
-  Code2,
+  Code,
   Award,
   Sparkles,
-  ExternalLink,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface RoadmapTimelineProps {
-  initialRoadmap: LearningRoadmapData;
+  roadmap: LearningRoadmapData;
 }
 
-export const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({ initialRoadmap }) => {
-  const [roadmap, setRoadmap] = useState<LearningRoadmapData>(initialRoadmap);
+export const RoadmapTimeline: React.FC<RoadmapTimelineProps> = ({ roadmap }) => {
+  const [completedSteps, setCompletedSteps] = useState<string[]>(
+    roadmap.steps.filter((s) => s.isCompleted).map((s) => s.id)
+  );
 
-  const toggleNode = (nodeId: string) => {
-    const updatedSteps = roadmap.steps.map((s) =>
-      s.id === nodeId ? { ...s, isCompleted: !s.isCompleted } : s
+  const toggleStep = (id: string) => {
+    setCompletedSteps((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
-    const completedCount = updatedSteps.filter((s) => s.isCompleted).length;
-    const progressPercent = Math.round((completedCount / updatedSteps.length) * 100);
-
-    setRoadmap({
-      ...roadmap,
-      steps: updatedSteps,
-      progressPercent,
-    });
   };
 
-  const getResourceIcon = (type: RoadmapStep["resourceType"]) => {
-    switch (type) {
+  const totalSteps = roadmap.steps.length;
+  const progressPercent = totalSteps > 0 ? Math.round((completedSteps.length / totalSteps) * 100) : 0;
+
+  const getResourceIcon = (type: string) => {
+    switch (type.toUpperCase()) {
       case "VIDEO":
-        return <Video size={14} className="text-rose-400" />;
-      case "ARTICLE":
-        return <FileText size={14} className="text-cyan-400" />;
+      case "COURSE":
+        return <Video size={14} className="text-cyan-400" />;
       case "PROJECT":
-        return <Code2 size={14} className="text-amber-400" />;
+        return <Code size={14} className="text-emerald-400" />;
+      case "DOCUMENTATION":
+      case "ARTICLE":
+        return <BookOpen size={14} className="text-indigo-400" />;
+      case "CERTIFICATION":
       case "CERT":
-        return <Award size={14} className="text-purple-400" />;
+        return <Award size={14} className="text-amber-400" />;
       default:
-        return <Sparkles size={14} className="text-indigo-400" />;
+        return <BookOpen size={14} className="text-indigo-400" />;
     }
   };
 
   return (
-    <Card className="h-full flex flex-col justify-between">
-      <div>
-        <div className="flex items-start justify-between gap-4 mb-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                <Compass size={16} />
-              </span>
-              <h3 className="text-base font-bold text-white">AI-Curated Learning Roadmap</h3>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">{roadmap.gapSummary}</p>
+    <Card className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <Sparkles className="text-accent-cyan" size={20} />
+              AI-Curated Learning Roadmap
+            </h3>
+            <Badge variant="primary" size="sm">
+              Target: {roadmap.targetRole}
+            </Badge>
           </div>
-          <Badge variant="cyan" size="md">
-            Target: {roadmap.targetRole}
-          </Badge>
+          <p className="text-xs text-slate-400 mt-1 max-w-2xl">
+            {roadmap.summary || roadmap.gapSummary || "Personalized gap recovery milestones."}
+          </p>
         </div>
 
-        {/* Progress bar header */}
-        <div className="glass-card p-3 rounded-xl mb-4 border border-white/5">
-          <div className="flex items-center justify-between text-xs mb-1.5">
-            <span className="font-semibold text-slate-300">Target Competency Progress</span>
-            <span className="font-bold text-accent-cyan">{roadmap.progressPercent}% Completed</span>
+        <div className="text-right sm:min-w-[140px]">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-300 mb-1">
+            <span>Milestone Progress</span>
+            <span className="text-primary-400 font-bold">{progressPercent}%</span>
           </div>
-          <Progress value={roadmap.progressPercent} variant="cyan" />
-        </div>
-
-        {/* Timeline steps */}
-        <div className="space-y-3 relative before:absolute before:left-3.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-white/10">
-          {roadmap.steps.map((step) => (
-            <div
-              key={step.id}
-              onClick={() => toggleNode(step.id)}
-              className={cn(
-                "relative pl-8 p-3 rounded-xl transition-all cursor-pointer border group",
-                step.isCompleted
-                  ? "bg-emerald-500/[0.04] border-emerald-500/20 hover:border-emerald-500/40"
-                  : "bg-white/[0.02] border-white/5 hover:border-white/20 hover:bg-white/[0.04]"
-              )}
-            >
-              {/* Step indicator circle */}
-              <div
-                className={cn(
-                  "absolute left-2 top-3.5 w-3.5 h-3.5 rounded-full flex items-center justify-center -translate-x-1/2 transition-colors",
-                  step.isCompleted
-                    ? "text-emerald-400 bg-slate-950"
-                    : "text-slate-500 bg-slate-950 group-hover:text-slate-300"
-                )}
-              >
-                {step.isCompleted ? <CheckCircle2 size={15} /> : <Circle size={14} />}
-              </div>
-
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-300 group-hover:text-white">
-                    Step {step.stepNumber}: {step.title}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="p-1 rounded bg-white/5">{getResourceIcon(step.resourceType)}</span>
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase">
-                    {step.resourceType}
-                  </span>
-                </div>
-              </div>
-
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">{step.description}</p>
-            </div>
-          ))}
+          <Progress value={progressPercent} variant="gradient" />
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs">
-        <span className="text-slate-400">Est. completion time: {roadmap.estimatedHours} hours</span>
-        <Button variant="outline" size="sm" icon={<Sparkles size={13} />}>
-          Recalculate Gaps
-        </Button>
+      {/* Steps Timeline */}
+      <div className="relative pl-6 border-l-2 border-primary-500/20 space-y-6">
+        {roadmap.steps.map((step, idx) => {
+          const isDone = completedSteps.includes(step.id);
+          const stepNum = step.stepNumber || step.week || idx + 1;
+
+          return (
+            <div key={step.id} className="relative group">
+              {/* Step Node Dot */}
+              <button
+                onClick={() => toggleStep(step.id)}
+                className={`absolute -left-[35px] top-1.5 w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                  isDone
+                    ? "bg-primary-500 text-white shadow-glow"
+                    : "bg-slate-900 border border-slate-700 text-slate-500 group-hover:border-primary-400"
+                }`}
+              >
+                {isDone ? <CheckCircle2 size={14} /> : <Circle size={12} />}
+              </button>
+
+              <div
+                className={`p-4 rounded-2xl glass-card border transition-all ${
+                  isDone
+                    ? "border-emerald-500/20 bg-emerald-950/5"
+                    : "border-white/5 hover:border-primary-500/30"
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-400">
+                      Step {stepNum}
+                    </span>
+                    <span className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-white/5 border border-white/5 text-slate-300 font-medium">
+                      {getResourceIcon(step.resourceType)}
+                      <span className="capitalize">{step.resourceType.toLowerCase()}</span>
+                    </span>
+                  </div>
+
+                  <span className="text-[11px] text-slate-400 font-medium">
+                    ~{step.estimatedHours || 6} hrs required
+                  </span>
+                </div>
+
+                <h4
+                  className={`text-sm font-bold mt-1.5 ${
+                    isDone ? "line-through text-slate-400" : "text-white"
+                  }`}
+                >
+                  {step.title}
+                </h4>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">{step.description}</p>
+
+                <div className="mt-3 flex items-center justify-between pt-2 border-t border-white/5">
+                  <a
+                    href={step.resourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs font-semibold text-accent-cyan hover:underline flex items-center gap-1"
+                  >
+                    Open Resource <ExternalLink size={12} />
+                  </a>
+
+                  <Button
+                    variant={isDone ? "ghost" : "outline"}
+                    size="sm"
+                    onClick={() => toggleStep(step.id)}
+                  >
+                    {isDone ? "Completed" : "Mark as Complete"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </Card>
   );
