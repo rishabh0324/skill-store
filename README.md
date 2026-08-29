@@ -30,44 +30,44 @@ Aligned with **NEP 2020 (National Education Policy)** and **Outcome-Based Educat
   • Public Profile   • Candidate Search   • OBE Rubrics       • Drive Analytics  • Governance
 ```
 
-### 1. User Roles & Workflows
+---
 
-1. **Student (`/student`)**:
-   - **Competency Radar**: Live visualization of verified vs. self-reported skills.
-   - **Adaptive Assessments**: Proctored testing cards that award verifiable Outcome-Based Education credentials.
-   - **AI Skill-Gap Roadmaps**: Automatically computes gaps against target corporate roles and generates step-by-step recovery milestones.
-   - **1-Click Matched Applications**: Multi-factor match ranking with 1-click job apply.
-   - **Public Verified Portfolio (`/p/[username]`)**: Shareable showcase with verifiable badges and project repositories.
+## 🎯 Current Implementation Status
 
-2. **Industry Partner / Recruiter (`/industry`)**:
-   - **Skill-Weighted Job Creator**: Define job openings with custom mathematical skill weights (1–5).
-   - **AI-Ranked ATS Pipeline**: Real-time candidate ranking based on skill overlap, test percentiles, and academic criteria.
-   - **Candidate Advancement**: 1-click status transitions (*Applied $\rightarrow$ Review $\rightarrow$ Shortlisted $\rightarrow$ Interview $\rightarrow$ Offered*).
-
-3. **Faculty / Mentor (`/faculty`)**:
-   - **Mentorship Scheduling**: 1-on-1 student career guidance and Google Meet session integration.
-   - **Curriculum Gap Advisory**: Aggregated recruiter search trends notifying departments of emerging industry tech requirements.
-
-4. **Institution Admin / TPO (`/institution`)**:
-   - **Placement Readiness Heatmap**: Batch and department-level readiness breakdowns.
-   - **Market Demand vs Campus Supply**: Real-time bottleneck identification.
-   - **Accreditation Export**: NAAC Criterion 5 and NIRF compliance audit readiness.
-
-5. **System Administrator (`/admin`)**:
-   - **Master Governance**: Platform security protocols, database status, and user directory oversight.
+| Phase | Description | Key Modules | Status |
+| :--- | :--- | :--- | :--- |
+| **Phase 1** | Project Architecture & Core Design System | Next.js 14, Tailwind Glassmorphism, Prisma ORM, REST API Envelope | ✅ **Completed** |
+| **Phase 2** | Authentication & Role-Based Access Control | 5 Roles, Bcrypt Hashing, JWT Cookies, Dynamic Register, `AuthGuard` | ✅ **Completed** |
+| **Phase 3** | **Student Skill Mapping & Adaptive Assessments** | **Master Skill Taxonomy, Anti-Cheat Tests, Automated Grading, OBE Badges, Public Portfolios** | ✅ **Completed** |
+| **Phase 4** | AI Skill-Gap Analysis & Learning Roadmaps | Vector Distance Engine, Cosine Matching, Curated Milestone Checklists | ⏳ Upcoming |
+| **Phase 5** | Recruiter Job Drives & Vector ATS Matching | Skill-Weighted Opening Creator, Sub-50ms Candidate Search, ATS Kanban | ⏳ Upcoming |
+| **Phase 6** | Faculty Mentorship & Institutional Analytics | Guidance Scheduler, Curriculum Advisory Telemetry, NAAC/NIRF Exports | ⏳ Upcoming |
 
 ---
 
-## 🔐 Phase 2: Authentication & Role-Based Access Control (RBAC)
+## 🚀 Phase 3: Skill Mapping, Adaptive Assessments & OBE Badges
 
-Phase 2 establishes an enterprise-grade authentication and user management foundation:
+Phase 3 introduces the student competency and evaluation engine:
 
-- **Password Hashing**: 10-round salted bcrypt hashing (`bcryptjs`).
-- **Session Management**: Cryptographically signed JSON Web Tokens (JWT) stored in HTTP-Only, SameSite cookies (`sih_token`).
-- **Dynamic Registration**: Role-specific telemetry forms tailored for Students, Industry Recruiters, Faculty, and Institutions.
-- **Route Protection (`AuthGuard`)**: Automatic route interceptors that prevent cross-role unauthorized access and redirect users to their designated desks.
-- **Password Recovery**: Secure token-based forgot-password and reset-password workflows.
-- **State Management**: Global React `AuthContext` with instant 1-click persona switching for hackathon evaluation.
+1. **Master Skill Taxonomy & 3-Tier Verification**:
+   - Master skill directory across *Languages, Frameworks, Databases, Cloud & DevOps, AI/ML, and Core Engineering*.
+   - 3-Tier verification funnel: `SELF_REPORTED` $\rightarrow$ `ASSESSMENT_VERIFIED` $\rightarrow$ `FACULTY_ENDORSED`.
+   - Dynamic polar radar visualization with live Recharts integration.
+   - Interactive modal to self-report emerging competencies.
+
+2. **Adaptive Proctored Test Engine**:
+   - Timed countdown tests with anti-cheat browser tab-switch detection.
+   - Randomized question banks with sanitized client delivery.
+   - Automated instant evaluation ($\ge 70\%$ passing threshold).
+   - Upgrades database skills to `ASSESSMENT_VERIFIED` and awards verified digital badges upon passing.
+   - Full question-by-question review with explanations.
+
+3. **Public Verified Student Portfolio (`/p/[username]`)**:
+   - Publicly accessible profile for recruiters and LinkedIn showcase.
+   - Verifiable OBE Badges with cryptographic verification IDs.
+   - Live competency radar comparing student metrics with industry benchmarks.
+   - Verified GitHub capstone projects and academic credentials.
+   - Print & PDF-ready resume format.
 
 ---
 
@@ -98,7 +98,7 @@ d:\sih#44\
 │   ├── register.tsx            # Dynamic role-based registration form
 │   ├── forgot-password.tsx     # Forgot password request page
 │   ├── reset-password.tsx      # Reset password form with token verification
-│   ├── student.tsx             # Student Dashboard (Protected: STUDENT)
+│   ├── student.tsx             # Student Dashboard (Live Radar, Skills, Test Center)
 │   ├── industry.tsx            # Industry Dashboard (Protected: INDUSTRY)
 │   ├── faculty.tsx             # Faculty Dashboard (Protected: FACULTY)
 │   ├── institution.tsx         # Institution Dashboard (Protected: INSTITUTION)
@@ -112,21 +112,26 @@ d:\sih#44\
 │       │   ├── me.ts           # Active session inspection
 │       │   ├── forgot-password.ts # Reset token generation
 │       │   └── reset-password.ts  # Token verification & password update
-│       ├── skills.ts           # Competency querying & self-reporting
-│       ├── assessments.ts      # Test fetching & submission grading
+│       ├── skills.ts           # Master skills querying & self-reporting
+│       ├── assessments/
+│       │   ├── index.ts        # Test catalog with attempt statuses
+│       │   ├── [id].ts         # Sanitized test question bank delivery
+│       │   └── [id]/submit.ts  # Test grading, score calc & badge award
+│       ├── portfolio/
+│       │   └── [username].ts   # Public verified student portfolio endpoint
 │       ├── roadmaps.ts         # Gap recovery milestone tracking
 │       ├── jobs.ts             # Job listings & recruiter openings
 │       ├── applications.ts     # ATS candidate status advancement
 │       ├── mentorship.ts       # Guidance slot booking & confirmation
 │       └── analytics.ts        # Institutional KPI aggregation
 ├── prisma/
-│   ├── schema.prisma           # Prisma Relational Schema (User, Profiles, ResetTokens)
-│   ├── seed.js                 # Database Seeder with 5 demo accounts
+│   ├── schema.prisma           # Prisma Schema (Users, Skills, Tests, Badges, Projects)
+│   ├── seed.js                 # Seeder with 5 roles, 10+ skills & question banks
 │   └── dev.db                  # Local SQLite database
 ├── src/
 │   ├── components/
 │   │   ├── shared/             # Navbar, RoleSwitcher, AuthGuard, MetricCard
-│   │   ├── student/            # SkillRadarChart, RoadmapTimeline, AssessmentCard, JobMatchesList
+│   │   ├── student/            # SkillRadarChart, ProctoredAssessmentModal, AddSkillModal
 │   │   ├── recruiter/          # CandidatesPipeline, PostJobModal, JobListingTable
 │   │   ├── faculty/            # MentorshipSchedule, CurriculumAdvisory
 │   │   ├── tpo/                # PlacementTrendsChart, DepartmentBreakdown
@@ -137,14 +142,11 @@ d:\sih#44\
 │   │   ├── auth.ts             # Auth utilities (bcrypt, JWT, session retrieval)
 │   │   ├── prisma.ts           # Prisma Client singleton
 │   │   ├── mockData.ts         # Platform fixtures & domain datasets
-│   │   ├── apiResponse.ts      # Standardized JSON response envelope
-│   │   └── utils.ts            # Styling & class merger
+│   │   └── apiResponse.ts      # Standardized JSON response envelope
 │   └── types/
 │       └── index.ts            # TypeScript interfaces & domain models
 ├── test_phase2_auth.js         # Automated 13-step Auth & RBAC test suite
-├── .env.example                # Environment variables template
-├── .env                        # Local configuration
-├── .gitignore                  # Git ignore rules (DB & env safely excluded)
+├── test_phase3_skills_assessments.js # Automated 11-step Skills & Tests test suite
 ├── package.json
 └── tsconfig.json
 ```
@@ -162,18 +164,22 @@ d:\sih#44\
 npm install
 ```
 
-### Step 2: Initialize Database & Seed Demo Accounts
+### Step 2: Initialize Database & Seed Master Data
 ```bash
 # Push schema to local SQLite database
 npx prisma db push
 
-# Seed 5 user personas with hashed credentials
+# Seed 5 user personas, master skills, and test question banks
 node prisma/seed.js
 ```
 
-### Step 3: Run Automated Verification Tests
+### Step 3: Run Automated Test Suites
 ```bash
+# Phase 2 Authentication & RBAC Tests
 node test_phase2_auth.js
+
+# Phase 3 Skill Mapping & Adaptive Assessments Tests
+node test_phase3_skills_assessments.js
 ```
 
 ### Step 4: Launch Development Server
@@ -185,13 +191,11 @@ npm.cmd run dev
 npm run dev
 ```
 
-Open **[http://localhost:3000](http://localhost:3000)** (or `http://localhost:3001`) in your browser.
+Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
 ---
 
 ## 🧪 Demo Persona Credentials
-
-Use the **"Demo Persona" dropdown** in the top navigation bar, or sign in manually at [`/login`](http://localhost:3000/login):
 
 | Persona | Role | Email | Password | Default Dashboard |
 | :--- | :--- | :--- | :--- | :--- |
@@ -201,49 +205,3 @@ Use the **"Demo Persona" dropdown** in the top navigation bar, or sign in manual
 | **Institution Admin** | `INSTITUTION` | `admin@nit-campus.edu` | `Password@123` | [`/institution`](http://localhost:3000/institution) |
 | **System Admin** | `ADMIN` | `admin@sih-platform.gov.in` | `Password@123` | [`/admin`](http://localhost:3000/admin) |
 | **Public Portfolio** | *Guest* | *(No login required)* | — | [`/p/aarav-sharma`](http://localhost:3000/p/aarav-sharma) |
-
----
-
-## 📡 REST API Catalog (`/api/v1`)
-
-| Endpoint | Method | Role Access | Description |
-| :--- | :--- | :--- | :--- |
-| `/api/v1/auth/register` | `POST` | Public | Register new user + role-specific profile |
-| `/api/v1/auth/login` | `POST` | Public | Authenticate user & set JWT session cookie |
-| `/api/v1/auth/logout` | `POST` | Authenticated | Clear session cookie |
-| `/api/v1/auth/me` | `GET` | Authenticated | Retrieve active authenticated session |
-| `/api/v1/auth/forgot-password` | `POST` | Public | Generate 1-hour password reset token |
-| `/api/v1/auth/reset-password` | `POST` | Public | Reset password with token confirmation |
-| `/api/v1/skills` | `GET`, `POST` | Student | Get competency radar / self-report skill |
-| `/api/v1/assessments` | `GET`, `POST` | Student | List available tests / submit test attempt |
-| `/api/v1/roadmaps` | `GET`, `PATCH` | Student | Get learning roadmap / toggle milestone |
-| `/api/v1/jobs` | `GET`, `POST` | Industry/Student | List AI-ranked jobs / post recruiter opening |
-| `/api/v1/applications` | `GET`, `POST`, `PATCH` | Industry/Student | ATS pipeline candidates & status advancement |
-| `/api/v1/mentorship` | `GET`, `POST` | Faculty/Student | Mentorship sessions & meeting links |
-| `/api/v1/analytics` | `GET` | Institution/Admin | Institutional KPIs & department breakdown |
-
----
-
-## 📊 Verification Test Results
-
-```
-==================================================
-🧪 RUNNING PHASE 2 AUTH & RBAC VERIFICATION SUITE
-==================================================
-✅ PASS: Student Login (student@sih.edu)
-✅ PASS: Industry Login (recruiter@techcorp.com)
-✅ PASS: Faculty Login (faculty@university.edu)
-✅ PASS: Institution Login (admin@nit-campus.edu)
-✅ PASS: Admin Login (admin@sih-platform.gov.in)
-✅ PASS: Invalid Password Rejection (401 Unauthorized)
-✅ PASS: Session Verification via /api/v1/auth/me
-✅ PASS: New Industry Registration & Profile Creation
-✅ PASS: Duplicate Account Prevention (409 Conflict)
-✅ PASS: Forgot Password Token Generation
-✅ PASS: Password Reset with Token Confirmation
-✅ PASS: Login with Reset Password
-✅ PASS: Logout and Cookie Clearance
-==================================================
-📊 TEST RESULTS: 13 Passed, 0 Failed
-==================================================
-```

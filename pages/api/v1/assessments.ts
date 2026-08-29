@@ -1,40 +1,68 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { MOCK_ASSESSMENTS } from "@/lib/mockData";
+import { prisma } from "@/lib/prisma";
+import { verifyJwtToken } from "@/lib/auth";
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "GET") {
-    return res.status(200).json({
-      success: true,
-      message: "Success",
-      data: {
-        assessments: MOCK_ASSESSMENTS,
-        totalAvailable: MOCK_ASSESSMENTS.length,
-        completed: MOCK_ASSESSMENTS.filter((a) => a.isCompleted).length,
-      },
-    });
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "GET") {
+    return res.status(405).json({ success: false, message: "Method not allowed" });
   }
 
-  if (req.method === "POST") {
-    const { assessmentId } = req.body;
-    const score = Math.floor(Math.random() * 25) + 75;
-    const passed = score >= 70;
+  try {
+    const token =
+      req.cookies.sih_token ||
+      req.headers.authorization?.replace(/^Bearer\s+/i, "");
+    const session = token ? verifyJwtToken(token) : null;
+
+    const assessments = await prisma.assessment.findMany({
+      include: {
+        skill: true,
+        _count: { select: { questions: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+
+    let studentAttemptsMap: Record<string, any> = {};
+
+    if (session) {
+      const attempts = await prisma.assessmentAttempt.findMany({
+        where: { userId: session.id },
+        orderBy: { completedAt: "desc" },
+      });
+
+      attempts.forEach((a) => {
+        if (!studentAttemptsMap[a.assessmentId] || a.isPassed) {
+          studentAttemptsMap[a.assessmentId] = a;
+        }
+      });
+    }
+
+    const formatted = assessments.map((a) => {
+      const attempt = studentAttemptsMap[a.id];
+      return {
+        id: a.id,
+        skillId: a.skillId,
+        skillName: a.skill.name,
+        category: a.skill.category,
+        title: a.title,
+        description: a.description,
+        difficulty: a.difficulty,
+        durationMinutes: a.durationMinutes,
+        totalQuestions: a.totalQuestions || a._count.questions,
+        passingScore: a.passingScore,
+        badgeReward: a.badgeReward,
+        status: attempt ? (attempt.isPassed ? "passed" : "failed") : "available",
+        bestScore: attempt ? attempt.score : null,
+        isCompleted: !!attempt && attempt.isPassed,
+      };
+    });
 
     return res.status(200).json({
       success: true,
-      message: "Assessment submitted and graded",
-      data: {
-        attempt: {
-          assessmentId,
-          score,
-          passed,
-          badgeUnlocked: passed ? "ASSESSMENT_VERIFIED" : null,
-          feedback: passed
-            ? "Outstanding performance! Your verified skill profile has been updated."
-            : "Keep practicing! Check your recommended learning roadmap.",
-        },
-      },
+      message: "Assessments retrieved successfully",
+      data: formatted,
     });
+  } catch (error: any) {
+    console.error("Error fetching assessments:", error);
+    return res.status(500).json({ success: false, message: "Internal server error fetching assessments" });
   }
-
-  return res.status(405).json({ success: false, message: "Method not allowed" });
 }

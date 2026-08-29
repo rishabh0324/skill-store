@@ -1,5 +1,5 @@
 // Prisma Schema for SIH 2026 Problem Statement 44: Academia-Industry Collaboration Platform
-// Phase 2: Authentication and Role-Based User Management
+// Phase 3: Student Skill Mapping, Adaptive Assessments & OBE Badges
 
 generator client {
   provider = "prisma-client-js"
@@ -26,6 +26,7 @@ model User {
   facultyProfile     FacultyProfile?
   institutionProfile InstitutionProfile?
   resetTokens        PasswordResetToken[]
+  assessmentAttempts AssessmentAttempt[]
 }
 
 model StudentProfile {
@@ -41,6 +42,9 @@ model StudentProfile {
   bio            String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  skills         StudentSkill[]
+  projects       PortfolioProject[]
 }
 
 model IndustryProfile {
@@ -92,4 +96,91 @@ model PasswordResetToken {
   expiresAt DateTime
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+// ----------------------------------------------------
+// PHASE 3 MODELS: SKILL TAXONOMY, ASSESSMENTS & OBE
+// ----------------------------------------------------
+
+model Skill {
+  id                 String   @id @default(cuid())
+  name               String   @unique
+  category           String   // Languages, Frameworks, Databases, Cloud & DevOps, AI / ML, Core Engineering
+  description        String?
+  industryBenchmark  Float    @default(80.0) // 0 - 100 percentage benchmark
+  icon               String?
+
+  studentSkills      StudentSkill[]
+  assessments        Assessment[]
+}
+
+model StudentSkill {
+  id                 String    @id @default(cuid())
+  studentProfileId   String
+  studentProfile     StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  skillId            String
+  skill              Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  selfScore          Float     @default(60.0)
+  verifiedScore      Float?
+  verificationStatus String    @default("SELF_REPORTED") // SELF_REPORTED, ASSESSMENT_VERIFIED, FACULTY_ENDORSED
+  badgeEarned        String?
+  verifiedAt         DateTime?
+  updatedAt          DateTime  @updatedAt
+
+  @@unique([studentProfileId, skillId])
+}
+
+model Assessment {
+  id              String   @id @default(cuid())
+  skillId         String
+  skill           Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  difficulty      String   @default("Intermediate") // Beginner, Intermediate, Advanced
+  durationMinutes Int      @default(15)
+  totalQuestions  Int      @default(5)
+  passingScore    Float    @default(70.0) // Passing percentage threshold
+  badgeReward     String   // e.g. "React Certified Developer"
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  questions       AssessmentQuestion[]
+  attempts        AssessmentAttempt[]
+}
+
+model AssessmentQuestion {
+  id                 String     @id @default(cuid())
+  assessmentId       String
+  assessment         Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  questionText       String
+  optionsJson        String     // JSON array of strings: '["Option A", "Option B", "Option C", "Option D"]'
+  correctOptionIndex Int        // 0-indexed correct option
+  explanation        String?
+}
+
+model AssessmentAttempt {
+  id               String     @id @default(cuid())
+  userId           String
+  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assessmentId     String
+  assessment       Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  score            Float
+  isPassed         Boolean
+  answersJson      String     // JSON array of selected indices
+  timeSpentSeconds Int        @default(0)
+  completedAt      DateTime   @default(now())
+}
+
+model PortfolioProject {
+  id               String         @id @default(cuid())
+  studentProfileId String
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  title            String
+  description      String
+  techStack        String         // Comma-separated or JSON string
+  repoUrl          String?
+  liveUrl          String?
+  isVerified       Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 }

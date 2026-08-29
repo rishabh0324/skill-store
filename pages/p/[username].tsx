@@ -1,225 +1,269 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import {
-  ShieldCheck,
-  Award,
-  Github,
-  Linkedin,
-  ExternalLink,
-  Code2,
-  CheckCircle,
-  FileDown,
-  Sparkles,
-} from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
+import Link from "next/link";
 import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { SkillRadarChart } from "@/components/student/SkillRadarChart";
+import {
+  GraduationCap,
+  Award,
+  CheckCircle2,
+  ExternalLink,
+  ShieldCheck,
+  Building,
+  Github,
+  Mail,
+  Download,
+  Share2,
+  QrCode,
+  Sparkles,
+  ArrowLeft,
+} from "lucide-react";
 
-export default function PublicPortfolioPage() {
+export default function PublicStudentPortfolioPage() {
   const router = useRouter();
   const { username } = router.query;
 
-  const student = {
-    name: "Aarav Sharma",
-    username: (username as string) || "aarav-sharma",
-    title: "Full-Stack Engineer & AI Systems Developer",
-    institution: "National Institute of Technology (NIT)",
-    department: "Computer Science & Engineering",
-    batch: "Class of 2026",
-    cgpa: 8.8,
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
-    bio: "Passionate about designing resilient microservices, vector search indexing, and real-time distributed applications. Top 5% assessed competency in Next.js, Python, and PostgreSQL.",
-    skills: [
-      { name: "React.js & Next.js 14", score: 92, verified: true },
-      { name: "Python & Fast-API", score: 88, verified: true },
-      { name: "Machine Learning (PyTorch)", score: 84, verified: true },
-      { name: "PostgreSQL & pgvector", score: 78, verified: true },
-      { name: "Docker & Containers", score: 65, verified: false },
-      { name: "System Design", score: 70, verified: false },
-    ],
-    projects: [
-      {
-        title: "AI-Powered Talent Vector Matcher",
-        desc: "Built a sub-50ms candidate search engine utilizing cosine similarity embeddings on PostgreSQL pgvector.",
-        tech: ["Next.js", "FastAPI", "pgvector", "Docker"],
-        demoUrl: "https://demo.nexus-edu.in",
-        repoUrl: "https://github.com/aarav-sharma/vector-matcher",
-      },
-      {
-        title: "Distributed Mentorship Booking Queue",
-        desc: "Designed an asynchronous scheduling engine with Redis distributed locks and WebSockets for real-time calendar synchronization.",
-        tech: ["Node.js", "Redis", "Socket.io", "Prisma"],
-        demoUrl: "https://demo.nexus-edu.in",
-        repoUrl: "https://github.com/aarav-sharma/mentor-queue",
-      },
-    ],
-    endorsements: [
-      {
-        by: "Dr. Ramesh Verma",
-        role: "Associate Professor, NIT",
-        comment:
-          "Aarav demonstrates exceptional architectural rigor in system design and database indexing.",
-      },
-    ],
+  const [data, setData] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (username) {
+      setLoading(true);
+      fetch(`/api/v1/portfolio/${username}`)
+        .then((res) => res.json())
+        .then((json) => {
+          if (json.success && json.data) {
+            setData(json.data);
+          }
+        })
+        .catch((err) => console.error("Error loading public portfolio:", err))
+        .finally(() => setLoading(false));
+    }
+  }, [username]);
+
+  const handleShare = () => {
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
-  return (
-    <div className="max-w-4xl mx-auto space-y-8 py-4">
-      {/* Verified Banner Header */}
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-white/10 space-y-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -z-10" />
+  const handlePrint = () => {
+    if (typeof window !== "undefined") {
+      window.print();
+    }
+  };
 
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
-          <img
-            src={student.avatar}
-            alt={student.name}
-            className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-indigo-500 shadow-glow"
-          />
+  if (loading) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-3">
+        <div className="w-8 h-8 rounded-full border-2 border-primary-500 border-t-transparent animate-spin" />
+        <p className="text-xs text-slate-400">Loading verified student credentials...</p>
+      </div>
+    );
+  }
 
-          <div className="space-y-2 flex-1">
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white">{student.name}</h1>
-              <Badge variant="success" size="md">
-                <ShieldCheck size={13} /> Institutional Verified
-              </Badge>
-            </div>
-
-            <p className="text-sm text-cyan-300 font-semibold">{student.title}</p>
-            <p className="text-xs text-slate-400">
-              {student.department} • {student.institution} • {student.batch} (CGPA: {student.cgpa})
-            </p>
-
-            <p className="text-xs text-slate-300 max-w-xl leading-relaxed pt-1">{student.bio}</p>
-
-            {/* Social & Download Links */}
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-2">
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold border border-white/10 transition-colors"
-              >
-                <Github size={14} /> GitHub
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold border border-white/10 transition-colors"
-              >
-                <Linkedin size={14} /> LinkedIn
-              </a>
-              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 text-xs font-semibold border border-indigo-500/30 transition-colors">
-                <FileDown size={14} /> Download Verified Resume
-              </button>
-            </div>
+  if (!data) {
+    return (
+      <div className="max-w-lg mx-auto py-16 text-center space-y-4">
+        <Card className="p-8 space-y-4">
+          <div className="w-12 h-12 mx-auto rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400">
+            <GraduationCap size={24} />
           </div>
+          <h2 className="text-lg font-bold text-white">Student Portfolio Not Found</h2>
+          <p className="text-xs text-slate-400">
+            The requested public verified profile could not be located in the SIH 2026 database.
+          </p>
+          <Link href="/">
+            <Button variant="secondary" size="sm" icon={<ArrowLeft size={14} />}>
+              Back to Home
+            </Button>
+          </Link>
+        </Card>
+      </div>
+    );
+  }
+
+  const { user, profile, verifiedBadges = [], radarSkills = [], projects = [], accreditationProof } = data;
+
+  return (
+    <div className="space-y-6 max-w-5xl mx-auto py-4">
+      {/* Verification Trust Header */}
+      <div className="glass-panel p-4 rounded-2xl border border-emerald-500/30 bg-emerald-950/[0.15] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <span className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 shadow-glow">
+            <ShieldCheck size={20} />
+          </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-white">Outcome-Based Education (OBE) Verified Profile</span>
+              <Badge variant="success" size="sm">NEP 2020 Compliant</Badge>
+            </div>
+            <p className="text-[11px] text-slate-300">
+              Verified by National Institute of Technology (NIRF Rank #{accreditationProof.institutionNIRFRank}) & NEXUS EDU Engine.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleShare} icon={<Share2 size={13} />}>
+            {copied ? "Link Copied!" : "Share Profile"}
+          </Button>
+          <Button variant="primary" size="sm" onClick={handlePrint} icon={<Download size={13} />}>
+            Print / PDF Resume
+          </Button>
         </div>
       </div>
 
-      {/* Verified Skills Showcase */}
-      <Card className="space-y-4">
+      {/* Main Student Header Card */}
+      <Card className="p-6 sm:p-8 space-y-6 relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <img
+              src={
+                user.avatarUrl ||
+                `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.name)}`
+              }
+              alt={user.name}
+              className="w-20 h-20 rounded-2xl object-cover border-2 border-indigo-500 shadow-glow"
+            />
+            <div>
+              <h1 className="text-2xl font-black text-white">{user.name}</h1>
+              <p className="text-xs font-semibold text-primary-400 mt-0.5">
+                {profile.degree} • {profile.department} (Class of {profile.graduationYear})
+              </p>
+              <p className="text-xs text-slate-400 mt-1 flex items-center gap-2">
+                <Building size={13} className="text-slate-400" />
+                <span>{profile.collegeName}</span>
+                <span>•</span>
+                <span className="text-slate-200 font-bold">CGPA: {profile.cgpa}</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-2xl bg-black/40 border border-white/10 text-right space-y-1 sm:min-w-[160px]">
+            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
+              OBE Credential ID
+            </span>
+            <p className="font-mono text-xs font-bold text-accent-cyan truncate">
+              SIH26-{user.id.substring(0, 10).toUpperCase()}
+            </p>
+            <span className="text-[10px] text-emerald-400 font-semibold block">
+              ● 100% Tamper Proof
+            </span>
+          </div>
+        </div>
+
+        {profile.bio && (
+          <p className="text-xs text-slate-300 leading-relaxed bg-white/[0.02] p-4 rounded-2xl border border-white/5">
+            {profile.bio}
+          </p>
+        )}
+      </Card>
+
+      {/* Verified OBE Badges Section */}
+      <Card className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-base font-bold text-white">Verified Competency Matrix</h3>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Accredited assessments and mentor evaluations aligned with Outcome-Based Education (OBE).
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <Award size={18} className="text-amber-400" />
+              Verifiable Outcome-Based Education (OBE) Badges
+            </h3>
+            <p className="text-xs text-slate-400">
+              Directly tied to verified problem-solving and adaptive assessment percentiles.
             </p>
           </div>
-          <Badge variant="cyan" size="sm">
-            <Sparkles size={11} /> NEP 2020 OBE
-          </Badge>
+          <Badge variant="cyan" size="sm">{verifiedBadges.length} Verified Badges</Badge>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {student.skills.map((skill, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
+          {verifiedBadges.map((badge: any) => (
             <div
-              key={i}
-              className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between"
+              key={badge.id}
+              className="p-4 rounded-2xl glass-card border border-emerald-500/20 bg-emerald-950/10 space-y-2.5"
             >
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-white">{skill.name}</span>
-                  {skill.verified ? (
-                    <Badge variant="success" size="sm">
-                      <CheckCircle size={10} /> Verified ({skill.score}%)
-                    </Badge>
-                  ) : (
-                    <Badge variant="neutral" size="sm">
-                      Self-Reported
-                    </Badge>
-                  )}
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                    <CheckCircle2 size={20} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-white">{badge.badgeName}</h4>
+                    <p className="text-[10px] text-slate-400">{badge.skillName} • Verified Score: <strong className="text-emerald-400">{badge.score}%</strong></p>
+                  </div>
                 </div>
+                <Badge variant="success" size="sm">{badge.obeLevel}</Badge>
+              </div>
+
+              <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                <span>Verification Hash: {badge.verificationHash}</span>
+                <span className="text-slate-500">Issuer: NEXUS EDU</span>
               </div>
             </div>
           ))}
         </div>
       </Card>
 
-      {/* Projects Showcase */}
-      <Card className="space-y-4">
-        <div>
-          <h3 className="text-base font-bold text-white">Featured Capstone & Industry Projects</h3>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Production-grade implementations with verified source code repositories.
-          </p>
+      {/* Competency Radar & Academic Highlights */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-6">
+          <SkillRadarChart skills={radarSkills} />
         </div>
 
-        <div className="space-y-3">
-          {student.projects.map((proj, i) => (
-            <div key={i} className="p-4 rounded-xl glass-card border border-white/5 space-y-2">
-              <div className="flex items-start justify-between gap-3">
-                <h4 className="text-sm font-bold text-white">{proj.title}</h4>
-                <div className="flex items-center gap-2">
-                  <a
-                    href={proj.repoUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-slate-400 hover:text-white p-1"
-                  >
-                    <Github size={15} />
-                  </a>
-                  <a
-                    href={proj.demoUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-accent-cyan hover:text-cyan-300 p-1"
-                  >
-                    <ExternalLink size={15} />
-                  </a>
+        <div className="lg:col-span-6">
+          <Card className="p-6 space-y-4 h-full flex flex-col justify-between">
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Sparkles size={18} className="text-accent-cyan" />
+                Verified Capstone Projects
+              </h3>
+              <p className="text-xs text-slate-400">
+                Endorsed by faculty mentors and backed by open-source code repositories.
+              </p>
+            </div>
+
+            <div className="space-y-3 my-2">
+              {projects.map((proj: any) => (
+                <div
+                  key={proj.id}
+                  className="p-3.5 rounded-2xl glass-card border border-white/5 space-y-1.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-white">{proj.title}</h4>
+                    {proj.isVerified && (
+                      <Badge variant="cyan" size="sm">
+                        <CheckCircle2 size={10} className="mr-1" /> Faculty Endorsed
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">{proj.description}</p>
+                  <div className="flex items-center justify-between pt-1 text-[10px]">
+                    <span className="text-indigo-400 font-medium">{proj.techStack}</span>
+                    {proj.repoUrl && (
+                      <a
+                        href={proj.repoUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-slate-300 hover:text-white flex items-center gap-1 font-semibold"
+                      >
+                        <Github size={12} /> Source Code
+                      </a>
+                    )}
+                  </div>
                 </div>
-              </div>
-
-              <p className="text-xs text-slate-300 leading-relaxed">{proj.desc}</p>
-
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {proj.tech.map((t, idx) => (
-                  <span
-                    key={idx}
-                    className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-white/5 text-indigo-300 border border-white/5"
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
+              ))}
             </div>
-          ))}
+
+            <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/5 text-[11px] text-slate-400 text-center">
+              Accredited for NAAC Criterion 5.2.1 (Student Progression & OBE Placement Badging)
+            </div>
+          </Card>
         </div>
-      </Card>
-
-      {/* Faculty Endorsement */}
-      <Card className="space-y-3">
-        <h3 className="text-base font-bold text-white">Faculty & Mentor Endorsement</h3>
-        {student.endorsements.map((end, i) => (
-          <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-2">
-            <p className="text-xs text-slate-300 italic leading-relaxed">"{end.comment}"</p>
-            <div className="flex items-center gap-2 text-xs">
-              <span className="font-bold text-white">{end.by}</span>
-              <span className="text-slate-500">•</span>
-              <span className="text-slate-400">{end.role}</span>
-            </div>
-          </div>
-        ))}
-      </Card>
+      </div>
     </div>
   );
 }
