@@ -857,7 +857,105 @@ async function main() {
     },
   });
 
-  console.log("✅ Phase 5 Corporate Job Drives & ATS Applications Seeded Successfully!");
+  // 10. Phase 6 Faculty Mentorship Slots & Endorsements
+  console.log("🏅 Seeding Phase 6 Faculty Mentorship Slots & Endorsements...");
+
+  const facultyUser = await prisma.user.findUnique({
+    where: { email: "faculty@university.edu" },
+    include: { facultyProfile: true },
+  });
+
+  const facultyProfileId = facultyUser.facultyProfile.id;
+
+  // Clear existing slots & bookings for clean seed
+  await prisma.mentorshipBooking.deleteMany({});
+  await prisma.mentorshipSlot.deleteMany({});
+  await prisma.facultyEndorsement.deleteMany({});
+
+  const slot1 = await prisma.mentorshipSlot.create({
+    data: {
+      facultyProfileId,
+      title: "1:1 AI Architecture & Capstone Guidance",
+      topic: "Capstone Project Evaluation & Distributed Vector Indexing",
+      scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
+      durationMinutes: 30,
+      meetingUrl: "https://meet.google.com/nexus-guidance-01",
+      status: "BOOKED",
+    },
+  });
+
+  const slot2 = await prisma.mentorshipSlot.create({
+    data: {
+      facultyProfileId,
+      title: "Outcome-Based Competency & Career Review",
+      topic: "Bridging Cloud DevOps Gap & Interview Readiness",
+      scheduledAt: new Date(Date.now() + 48 * 60 * 60 * 1000), // Day after tomorrow
+      durationMinutes: 45,
+      meetingUrl: "https://meet.google.com/nexus-guidance-02",
+      status: "AVAILABLE",
+    },
+  });
+
+  const slot3 = await prisma.mentorshipSlot.create({
+    data: {
+      facultyProfileId,
+      title: "Industry Alignment & NEP 2020 OBE Mentorship",
+      topic: "Advanced PostgreSQL & Query Optimization Rubrics",
+      scheduledAt: new Date(Date.now() + 72 * 60 * 60 * 1000),
+      durationMinutes: 30,
+      meetingUrl: "https://meet.google.com/nexus-guidance-03",
+      status: "AVAILABLE",
+    },
+  });
+
+  // Seed booking for student Aarav Sharma on Slot 1
+  await prisma.mentorshipBooking.create({
+    data: {
+      slotId: slot1.id,
+      studentProfileId: studentProfile.id,
+      notes: "Seeking faculty guidance on my Full-Stack AI Solutions Capstone and Docker containerization benchmarks.",
+      status: "CONFIRMED",
+    },
+  });
+
+  // Seed Faculty Endorsement on student's Data Structures skill
+  const dsaSkill = await prisma.skill.findUnique({
+    where: { name: "Data Structures & Algorithms" },
+  });
+
+  if (dsaSkill) {
+    const studentSkillRecord = await prisma.studentSkill.findUnique({
+      where: {
+        studentProfileId_skillId: {
+          studentProfileId: studentProfile.id,
+          skillId: dsaSkill.id,
+        },
+      },
+    });
+
+    if (studentSkillRecord) {
+      await prisma.studentSkill.update({
+        where: { id: studentSkillRecord.id },
+        data: {
+          verificationStatus: "FACULTY_ENDORSED",
+          verifiedScore: 92.0,
+          badgeEarned: "DSA Faculty Endorsed Master",
+          verifiedAt: new Date(),
+        },
+      });
+
+      await prisma.facultyEndorsement.create({
+        data: {
+          facultyProfileId,
+          studentSkillId: studentSkillRecord.id,
+          endorsedScore: 92.0,
+          feedback: "Demonstrated exceptional problem-solving in advanced graph algorithms and dynamic programming lab tests.",
+        },
+      });
+    }
+  }
+
+  console.log("✅ Phase 6 Faculty Mentorship & Endorsements Seeded Successfully!");
 }
 
 main()
@@ -868,5 +966,6 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
 
 

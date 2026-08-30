@@ -47,6 +47,7 @@ model StudentProfile {
   projects       PortfolioProject[]
   roadmaps       LearningRoadmap[]
   applications   JobApplication[]
+  bookings       MentorshipBooking[]
 }
 
 model IndustryProfile {
@@ -74,6 +75,9 @@ model FacultyProfile {
   specialization  String?  @default("Distributed Systems & Cloud Computing")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  mentorshipSlots MentorshipSlot[]
+  endorsements    FacultyEndorsement[]
 }
 
 model InstitutionProfile {
@@ -130,6 +134,8 @@ model StudentSkill {
   badgeEarned        String?
   verifiedAt         DateTime?
   updatedAt          DateTime  @updatedAt
+
+  endorsements       FacultyEndorsement[]
 
   @@unique([studentProfileId, skillId])
 }
@@ -289,5 +295,51 @@ model JobApplication {
 
   @@unique([jobPostingId, studentProfileId])
 }
+
+// ----------------------------------------------------
+// PHASE 6 MODELS: FACULTY MENTORSHIP & ACCREDITATION
+// ----------------------------------------------------
+
+model MentorshipSlot {
+  id               String              @id @default(cuid())
+  facultyProfileId String
+  facultyProfile   FacultyProfile      @relation(fields: [facultyProfileId], references: [id], onDelete: Cascade)
+  title            String              @default("1:1 Industry Alignment & Capstone Guidance")
+  topic            String              @default("AI Systems Architecture & Skill Gap Review")
+  scheduledAt      DateTime
+  durationMinutes  Int                 @default(30)
+  meetingUrl       String              @default("https://meet.google.com/nexus-guidance")
+  status           String              @default("AVAILABLE") // AVAILABLE, BOOKED, COMPLETED, CANCELLED
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  bookings         MentorshipBooking[]
+}
+
+model MentorshipBooking {
+  id               String         @id @default(cuid())
+  slotId           String
+  slot             MentorshipSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  studentProfileId String
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  notes            String?
+  status           String         @default("CONFIRMED") // PENDING, CONFIRMED, COMPLETED, CANCELLED
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@unique([slotId, studentProfileId])
+}
+
+model FacultyEndorsement {
+  id               String         @id @default(cuid())
+  facultyProfileId String
+  facultyProfile   FacultyProfile @relation(fields: [facultyProfileId], references: [id], onDelete: Cascade)
+  studentSkillId   String
+  studentSkill     StudentSkill   @relation(fields: [studentSkillId], references: [id], onDelete: Cascade)
+  endorsedScore    Float          @default(85.0)
+  feedback         String?
+  createdAt        DateTime       @default(now())
+}
+
 
 

@@ -1,6 +1,6 @@
 # NEXUS EDU — Academia–Industry Collaboration Platform
 > **Smart India Hackathon (SIH) 2026 • Problem Statement 44**  
-> AI-driven Student Skill Mapping, Adaptive Assessments, Gap Analysis, Recruiter ATS, and Institutional Analytics.
+> AI-driven Student Skill Mapping, Adaptive Assessments, Gap Analysis, Recruiter ATS, Faculty Mentorship, and Institutional Accreditation Analytics.
 
 ---
 
@@ -25,14 +25,14 @@ Aligned with **NEP 2020 (National Education Policy)** and **Outcome-Based Educat
  🎓 Student Desk    💼 Industry Desk     🏅 Faculty Hub     🏛️ Institution     🛡️ System Admin
   (/student)         (/industry)          (/faculty)          (/institution)     (/admin)
   • Skill Radar      • Job Weightings     • Mentorship        • TPO Analytics    • System Security
-  • Adaptive Tests   • Vector ATS Match   • Capstone Reviews  • Demand/Supply    • User Directory
+  • Adaptive Tests   • Vector ATS Match   • Skill Endorsement • Demand/Supply    • User Directory
   • Gap Roadmaps     • Pipeline Tracker   • Syllabus Advisor  • NAAC/NIRF Export • Audit Logs
-  • Public Profile   • Candidate Search   • OBE Rubrics       • Drive Analytics  • Governance
+  • Job Matches      • Candidate Search   • Capstone Reviews  • Drive Analytics  • Governance
 ```
 
 ---
 
-## 🎯 Implementation Status
+## 🎯 Implementation Status (All 6 Phases Completed & Verified)
 
 | Phase | Description | Key Modules | Status |
 | :--- | :--- | :--- | :--- |
@@ -40,8 +40,25 @@ Aligned with **NEP 2020 (National Education Policy)** and **Outcome-Based Educat
 | **Phase 2** | Authentication & Role-Based Access Control | 5 Roles, Bcrypt Hashing, JWT Cookies, Dynamic Register, `AuthGuard` | ✅ **Completed** |
 | **Phase 3** | Student Skill Mapping & Adaptive Assessments | Master Skill Taxonomy, Anti-Cheat Tests, Automated Grading, OBE Badges, Public Portfolios | ✅ **Completed** |
 | **Phase 4** | AI Skill-Gap Analysis & Learning Roadmaps | Vector Distance Engine, Cosine Matching, Curated Milestone Checklists, DB Persistence | ✅ **Completed** |
-| **Phase 5** | **Recruiter Job Drives & Vector ATS Matching** | **Skill-Weighted Opening Creator, Sub-50ms Candidate Search, ATS Kanban, 1-Click Apply** | ✅ **Completed** |
-| **Phase 6** | Faculty Mentorship & Institutional Analytics | Guidance Scheduler, Curriculum Advisory Telemetry, NAAC/NIRF Exports | ⏳ Upcoming |
+| **Phase 5** | Recruiter Job Drives & Vector ATS Matching | Skill-Weighted Opening Creator, Sub-50ms Candidate Search, ATS Kanban, 1-Click Apply | ✅ **Completed** |
+| **Phase 6** | **Faculty Mentorship & Institutional Analytics** | **Guidance Scheduler, Competency Endorsement, Curriculum Advisor, NAAC/NIRF Exports** | ✅ **Completed** |
+
+---
+
+## 🚀 Phase 6: Faculty Mentorship, Institutional Analytics & NAAC/NIRF Accreditation
+
+Phase 6 closes the academic governance loop by empowering faculty educators and college TPO administrators:
+
+1. **Faculty Mentorship & Capstone Advisory Hub (`/faculty`)**:
+   - 1:1 Guidance Slot creation, student booking management, Google Meet video call links, and session lifecycle tracking (`AVAILABLE` $\rightarrow$ `BOOKED` $\rightarrow$ `COMPLETED`).
+   - Real-time **Student Competency Endorsement Desk**: Faculty validate and grant official academic endorsement on student skills with score and feedback (upgrades to `FACULTY_ENDORSED` tier with $0.95\times$ vector weight credit).
+   - **Industry-Driven Curriculum Advisory**: AI feedback loop recommending course syllabus modernizations based on live corporate hiring telemetry.
+
+2. **Institutional TPO Analytics & Accreditation Desk (`/institution`)**:
+   - Live campus placement metrics (Total Candidates, Placement Rate %, Active Drives, Average CTC ₹18.4 LPA, Highest CTC ₹45.0 LPA).
+   - Department-wise Skill Readiness Index progress bars (CSE, AI/DS, IT, ECE).
+   - Dynamic Recharts visualization comparing **Industry Skill Demand vs Campus Talent Supply**.
+   - **Accreditation Export Center**: 1-Click export of **NAAC Criteria 2.6 & 5.2** reports, **NIRF Graduate Placement & Median Salary Data**, and **NBA Program Outcome (PO1–PO12) Attainment Matrices**.
 
 ---
 
@@ -65,51 +82,34 @@ Phase 5 connects corporate industry talent acquisition leads with student candid
    - Students see opportunities ranked by personalized AI match scores.
    - 1-Click application submission with live status tracking.
 
-5. **Prisma Database Schema & REST APIs**:
-   - `JobPosting` and `JobApplication` models synchronized to SQLite.
-   - REST endpoints: `GET/POST /api/v1/jobs`, `GET /api/v1/jobs/[id]`, and `GET/POST/PATCH /api/v1/applications`.
-
 ---
 
 ## 🚀 Phase 4: AI Skill-Gap Analysis & Personalized Learning Roadmaps
-
-Phase 4 delivers the AI-powered vector comparison and learning pathway engine:
 
 1. **Multi-Factor Vector Cosine Similarity Engine**:
    - Compares multi-dimensional student competency vectors $\vec{S}$ with industry job benchmark vectors $\vec{T}$:
      $$\text{Cosine Similarity} = \frac{\vec{S} \cdot \vec{T}}{\|\vec{S}\| \|\vec{T}\|}$$
    - Weighted overall role fit score ($0 - 100\%$) applying tiered multipliers: Verified Assessments (1.0x), Faculty Endorsements (0.95x), Self-Reported (0.85x), and Missing (0.0x).
-   - Classifies competency status into **Strengths / Benchmarks Met** ($\ge 0$), **Moderate Gaps** ($-1\%$ to $-20\%$), and **Critical Gaps** ($<-20\%$ or mandatory deficit).
 
 2. **Master Target Career Roles Catalog**:
    - Master industry tracks (*Full-Stack AI Solutions Architect*, *Cloud DevOps & Platform Engineer*, *Data Scientist & ML Specialist*, *Distributed Backend Systems Engineer*).
-   - Demand level analytics (`CRITICAL`, `VERY HIGH`), average compensation brackets, and vector dimension weights.
 
 3. **Dynamic Database-Backed Milestone Generator**:
-   - Automatically synthesizes prioritized recovery milestone checklists targeting candidate-specific deficits.
-   - Direct integration with curated high-yield video courses, hands-on GitHub projects, official documentation, interactive labs, and capstone blueprints.
-   - Real-time interactive milestone checkbox toggling via `PATCH /api/v1/roadmaps/steps/[id]` with persistent progress percentage updates.
+   - Curated high-yield video courses, hands-on GitHub projects, official documentation, interactive labs, and capstone blueprints with real-time checkbox progress tracking.
 
 ---
 
 ## 🚀 Phase 3: Skill Mapping, Adaptive Assessments & OBE Badges
 
-Phase 3 introduces the student competency and evaluation engine:
-
 1. **Master Skill Taxonomy & 3-Tier Verification**:
-   - Master skill directory across *Languages, Frameworks, Databases, Cloud & DevOps, AI/ML, and Core Engineering*.
    - 3-Tier verification funnel: `SELF_REPORTED` $\rightarrow$ `ASSESSMENT_VERIFIED` $\rightarrow$ `FACULTY_ENDORSED`.
    - Dynamic polar radar visualization with live Recharts integration.
 
 2. **Adaptive Proctored Test Engine**:
-   - Timed countdown tests with anti-cheat browser tab-switch detection.
-   - Automated instant evaluation ($\ge 70\%$ passing threshold).
-   - Upgrades database skills to `ASSESSMENT_VERIFIED` and awards verified digital badges upon passing.
+   - Timed countdown tests with anti-cheat browser tab-switch detection and automated grading ($\ge 70\%$ threshold).
 
 3. **Public Verified Student Portfolio (`/p/[username]`)**:
-   - Publicly accessible profile for recruiters and LinkedIn showcase.
-   - Verifiable OBE Badges with cryptographic verification IDs.
-   - Print & PDF-ready resume format.
+   - Publicly accessible profile with verifiable digital OBE Badges and cryptographic verification IDs.
 
 ---
 
@@ -120,7 +120,7 @@ Phase 3 introduces the student competency and evaluation engine:
 | **Frontend Framework** | **Next.js 14 + React 18 + TypeScript** |
 | **Styling & Design System** | **Tailwind CSS + Glassmorphism UI Tokens** |
 | **UI Components & Icons** | **Lucide React + Atomic Component Architecture** |
-| **Data Visualizations** | **Recharts (Polar Radar, Multi-Bar, Trends)** |
+| **Data Visualizations** | **Recharts (Polar Radar, Multi-Bar, Trends, Curves)** |
 | **Backend & Routing** | **Next.js REST API Route Handlers (`/api/v1/...`)** |
 | **Database & ORM** | **SQLite (Local Zero-Config) / PostgreSQL + Prisma ORM** |
 | **Authentication & Security** | **JWT (HTTP-Only Cookie) + Bcrypt Salt Hashing + RBAC Guard** |
@@ -143,8 +143,8 @@ d:\sih#44\
 │   ├── student.tsx             # Student Dashboard (Live Radar, Skills, Test Center, Roadmaps, Job Matches)
 │   ├── industry.tsx            # Industry Recruiter Dashboard (Protected: INDUSTRY, Vector ATS, Drives)
 │   ├── recruiter.tsx           # Industry Recruiter Desk alias
-│   ├── faculty.tsx             # Faculty Dashboard (Protected: FACULTY)
-│   ├── institution.tsx         # Institution Dashboard (Protected: INSTITUTION)
+│   ├── faculty.tsx             # Faculty Dashboard (Protected: FACULTY, Mentorship, Endorsements)
+│   ├── institution.tsx         # Institution Dashboard (Protected: INSTITUTION, TPO Telemetry, Accreditation)
 │   ├── admin.tsx               # System Admin Dashboard (Protected: ADMIN)
 │   ├── p/[username].tsx        # Public Verified Student Portfolio
 │   └── api/v1/                 # RESTful API Endpoints
@@ -170,19 +170,22 @@ d:\sih#44\
 │       │   ├── index.ts        # Job listings & skill-weighted opening creator
 │       │   └── [id].ts         # Job drive details & applicant pool
 │       ├── applications.ts     # ATS candidate status advancement & 1-click apply
-│       ├── mentorship.ts       # Guidance slot booking & confirmation
-│       └── analytics.ts        # Institutional KPI aggregation
+│       ├── mentorship.ts       # Guidance slot booking, creation & confirmation
+│       ├── endorsements.ts     # Faculty skill endorsement & score credit
+│       └── analytics/
+│           ├── index.ts        # Institutional TPO KPI aggregation
+│           └── accreditation.ts # NAAC, NIRF, and NBA compliance exporter
 ├── prisma/
-│   ├── schema.prisma           # Prisma Schema (Users, Skills, Tests, Roadmaps, JobPostings, Applications)
-│   ├── seed.js                 # Seeder with 5 roles, skills, tests, roadmaps, job drives
+│   ├── schema.prisma           # Complete Schema (Users, Skills, Tests, Roadmaps, Jobs, Applications, Mentorship, Endorsements)
+│   ├── seed.js                 # Full Database Seeder with 5 User Personas & Master Content
 │   └── dev.db                  # Local SQLite database
 ├── src/
 │   ├── components/
 │   │   ├── shared/             # Navbar, RoleSwitcher, AuthGuard, MetricCard
 │   │   ├── student/            # SkillRadarChart, ProctoredAssessmentModal, SkillGapMatrix, TargetRoleSelector, RoadmapTimeline, JobMatchesList
 │   │   ├── recruiter/          # CandidatesPipeline, PostJobModal, JobListingTable
-│   │   ├── faculty/            # MentorshipSchedule, CurriculumAdvisory
-│   │   ├── tpo/                # PlacementTrendsChart, DepartmentBreakdown
+│   │   ├── faculty/            # MentorshipSchedule, EndorsementDesk, CurriculumAdvisory
+│   │   ├── tpo/                # PlacementTrendsChart, DepartmentBreakdown, AccreditationExportModal
 │   │   └── ui/                 # Button, Card, Badge, Progress, Modal
 │   ├── context/
 │   │   └── AuthContext.tsx     # Global React AuthContext & session hook
@@ -198,6 +201,7 @@ d:\sih#44\
 ├── test_phase3_skills_assessments.js # Automated 11-step Skills & Tests test suite
 ├── test_phase4_gap_roadmaps.js # Automated 13-step AI Gap & Roadmaps test suite
 ├── test_phase5_recruiter_ats.js # Automated 14-step Recruiter & Vector ATS test suite
+├── test_phase6_faculty_institution.js # Automated 14-step Faculty & TPO Analytics test suite
 ├── package.json
 └── tsconfig.json
 ```
@@ -220,23 +224,18 @@ npm install
 # Push schema to local SQLite database
 npx prisma db push
 
-# Seed 5 user personas, master skills, tests, roadmaps, and job drives
+# Seed 5 user personas, master skills, tests, roadmaps, job drives, and mentorship
 node prisma/seed.js
 ```
 
-### Step 3: Run Automated Test Suites
+### Step 3: Run Full Automated Test Suite (65 Assertions, 100% Pass)
 ```bash
-# Phase 2 Authentication & RBAC Tests
+# Run all test suites
 node test_phase2_auth.js
-
-# Phase 3 Skill Mapping & Adaptive Assessments Tests
 node test_phase3_skills_assessments.js
-
-# Phase 4 AI Skill-Gap Analysis & Learning Roadmaps Tests
 node test_phase4_gap_roadmaps.js
-
-# Phase 5 Recruiter Job Drives & Vector ATS Tests
 node test_phase5_recruiter_ats.js
+node test_phase6_faculty_institution.js
 ```
 
 ### Step 4: Launch Development Server
