@@ -725,7 +725,139 @@ async function main() {
     });
   }
 
-  console.log("✅ Phase 4 Master Target Roles & Roadmaps Seeded Successfully!");
+  // 9. Phase 5 Corporate Job Drives & Vector ATS Pipelines
+  console.log("💼 Seeding Phase 5 Corporate Job Drives & ATS Applications...");
+
+  // Find recruiter industry profile
+  const recruiterUser = await prisma.user.findUnique({
+    where: { email: "recruiter@techcorp.com" },
+    include: { industryProfile: true },
+  });
+
+  const industryProfileId = recruiterUser.industryProfile.id;
+
+  const jobPostingsData = [
+    {
+      industryProfileId,
+      title: "Graduate Software Engineer - Cloud & Distributed AI",
+      description: "Join the Azure Cloud platform team building next-generation AI infrastructure, distributed microservices, and high-throughput vector search APIs.",
+      jobType: "INTERNSHIP",
+      location: "Bengaluru / Hybrid",
+      stipendSalary: "₹1,25,000/mo",
+      minCgpa: 8.0,
+      deadline: new Date("2026-10-30"),
+      status: "OPEN",
+      requiredSkills: [
+        { name: "React.js & Next.js", weight: 5, minBenchmark: 85, isMandatory: true },
+        { name: "Python & Fast-API", weight: 5, minBenchmark: 80, isMandatory: true },
+        { name: "PostgreSQL & Prisma ORM", weight: 4, minBenchmark: 75, isMandatory: true },
+        { name: "Docker & Containerization", weight: 4, minBenchmark: 75, isMandatory: false },
+        { name: "Data Structures & Algorithms", weight: 4, minBenchmark: 80, isMandatory: true },
+      ],
+    },
+    {
+      industryProfileId,
+      title: "Full-Stack Payment Systems Engineer",
+      description: "Work on mission-critical payment gateway systems handling millions of daily transactions with ultra-low latency and strict ACID consistency.",
+      jobType: "FULL_TIME",
+      location: "Bengaluru / Remote",
+      stipendSalary: "₹24,00,000/yr",
+      minCgpa: 7.5,
+      deadline: new Date("2026-11-15"),
+      status: "OPEN",
+      requiredSkills: [
+        { name: "React.js & Next.js", weight: 5, minBenchmark: 80, isMandatory: true },
+        { name: "TypeScript", weight: 4, minBenchmark: 75, isMandatory: true },
+        { name: "PostgreSQL & Prisma ORM", weight: 5, minBenchmark: 80, isMandatory: true },
+        { name: "Redis & Distributed Caching", weight: 4, minBenchmark: 75, isMandatory: false },
+        { name: "Data Structures & Algorithms", weight: 4, minBenchmark: 80, isMandatory: true },
+      ],
+    },
+    {
+      industryProfileId,
+      title: "AI/ML Systems & Computer Vision Intern",
+      description: "Design edge AI models and tensor acceleration pipelines for automotive and smart industrial telemetry diagnostics.",
+      jobType: "INTERNSHIP",
+      location: "Pune / On-Site",
+      stipendSalary: "₹45,000/mo",
+      minCgpa: 7.0,
+      deadline: new Date("2026-10-15"),
+      status: "OPEN",
+      requiredSkills: [
+        { name: "Python & Fast-API", weight: 5, minBenchmark: 80, isMandatory: true },
+        { name: "Machine Learning & PyTorch", weight: 5, minBenchmark: 80, isMandatory: true },
+        { name: "Docker & Containerization", weight: 3, minBenchmark: 70, isMandatory: false },
+      ],
+    },
+  ];
+
+  const seededJobs = [];
+  for (const jd of jobPostingsData) {
+    const existingJob = await prisma.jobPosting.findFirst({
+      where: {
+        industryProfileId: jd.industryProfileId,
+        title: jd.title,
+      },
+    });
+
+    let jobRecord;
+    if (existingJob) {
+      jobRecord = await prisma.jobPosting.update({
+        where: { id: existingJob.id },
+        data: {
+          description: jd.description,
+          jobType: jd.jobType,
+          location: jd.location,
+          stipendSalary: jd.stipendSalary,
+          minCgpa: jd.minCgpa,
+          deadline: jd.deadline,
+          status: jd.status,
+          requiredSkillsJson: JSON.stringify(jd.requiredSkills),
+        },
+      });
+    } else {
+      jobRecord = await prisma.jobPosting.create({
+        data: {
+          industryProfileId: jd.industryProfileId,
+          title: jd.title,
+          description: jd.description,
+          jobType: jd.jobType,
+          location: jd.location,
+          stipendSalary: jd.stipendSalary,
+          minCgpa: jd.minCgpa,
+          deadline: jd.deadline,
+          status: jd.status,
+          requiredSkillsJson: JSON.stringify(jd.requiredSkills),
+        },
+      });
+    }
+    seededJobs.push(jobRecord);
+  }
+
+  // Seed demo candidate application for student Aarav Sharma
+  const firstJob = seededJobs[0];
+  await prisma.jobApplication.upsert({
+    where: {
+      jobPostingId_studentProfileId: {
+        jobPostingId: firstJob.id,
+        studentProfileId: studentProfile.id,
+      },
+    },
+    update: {
+      status: "SHORTLISTED",
+      vectorMatchScore: 94.0,
+      matchScore: 94.0,
+    },
+    create: {
+      jobPostingId: firstJob.id,
+      studentProfileId: studentProfile.id,
+      status: "SHORTLISTED",
+      vectorMatchScore: 94.0,
+      matchScore: 94.0,
+    },
+  });
+
+  console.log("✅ Phase 5 Corporate Job Drives & ATS Applications Seeded Successfully!");
 }
 
 main()
@@ -736,4 +868,5 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
 

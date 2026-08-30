@@ -507,3 +507,141 @@ function generateAIGapSummary(
 
   return summary.trim();
 }
+
+export interface JobSkillRequirement {
+  name: string;
+  weight: number; // 1 - 5
+  minBenchmark?: number;
+  isMandatory?: boolean;
+}
+
+export interface JobMatchResult {
+  matchScore: number; // 0 - 100%
+  vectorMatchScore: number;
+  cosineSimilarity: number;
+  meetsMandatorySkills: boolean;
+  meetsMinCgpa: boolean;
+  matchedSkills: {
+    skillName: string;
+    studentScore: number;
+    requiredWeight: number;
+    isMandatory: boolean;
+    isVerified: boolean;
+  }[];
+}
+
+/**
+ * Calculates zero-latency multi-factor ATS candidate vector match score for a job posting
+ */
+export function calculateJobMatchScore(
+  studentSkills: any[],
+  requiredSkills: JobSkillRequirement[] | string,
+  studentCgpa?: number | null,
+  minCgpa: number = 7.0
+): JobMatchResult {
+  const reqSkills: JobSkillRequirement[] =
+    typeof requiredSkills === "string" ? JSON.parse(requiredSkills) : requiredSkills;
+
+  const studentSkillMap = new Map<string, any>();
+  for (const s of studentSkills) {
+    const key = (s.name || s.skill?.name || "").trim().toLowerCase();
+    if (key) {
+      studentSkillMap.set(key, s);
+    }
+  }
+
+  const studentVector: number[] = [];
+  const targetVector: number[] = [];
+
+  let totalWeightedScore = 0;
+  let totalWeight = 0;
+  let meetsMandatory = true;
+
+  const matchedSkills: {
+    skillName: string;
+    studentScore: number;
+    requiredWeight: number;
+    isMandatory: boolean;
+    isVerified: boolean;
+  }[] = [];
+
+  for (const req of reqSkills) {
+    const reqKey = req.name.trim().toLowerCase();
+    let matchingRecord: any = null;
+
+    for (const [sKey, sVal] of Array.from(studentSkillMap.entries())) {
+      if (sKey === reqKey || sKey.includes(reqKey) || reqKey.includes(sKey)) {
+        matchingRecord = sVal;
+        break;
+      }
+    }
+
+    const weight = req.weight || 3;
+    const isMandatory = req.isMandatory || false;
+    const minBenchmark = req.minBenchmark || 70.0;
+
+    let studentScore = 0;
+    let isVerified = false;
+    let multiplier = 1.0;
+
+    if (matchingRecord) {
+      const vScore = matchingRecord.verifiedScore;
+      const sScore = matchingRecord.selfScore;
+      const vStatus = matchingRecord.verificationStatus || (matchingRecord.isVerified ? "ASSESSMENT_VERIFIED" : "SELF_REPORTED");
+
+      if (vStatus === "ASSESSMENT_VERIFIED" && vScore != null) {
+        studentScore = Number(vScore);
+        isVerified = true;
+        multiplier = 1.0;
+      } else if (vStatus === "FACULTY_ENDORSED" && vScore != null) {
+        studentScore = Number(vScore);
+        isVerified = true;
+        multiplier = 0.95;
+      } else if (sScore != null) {
+        studentScore = Number(sScore);
+        multiplier = 0.85;
+      } else {
+        studentScore = 50.0;
+        multiplier = 0.75;
+      }
+    } else {
+      studentScore = 0.0;
+      multiplier = 0.0;
+    }
+
+    if (isMandatory && studentScore < minBenchmark) {
+      meetsMandatory = false;
+    }
+
+    studentVector.push(studentScore);
+    targetVector.push(minBenchmark);
+
+    const ratio = Math.min(1.2, studentScore / Math.max(1, minBenchmark));
+    const effectiveCredit = ratio * 100 * multiplier;
+    totalWeightedScore += effectiveCredit * weight;
+    totalWeight += weight;
+
+    matchedSkills.push({
+      skillName: req.name,
+      studentScore,
+      requiredWeight: weight,
+      isMandatory,
+      isVerified,
+    });
+  }
+
+  const cosineSimilarity = calculateCosineSimilarity(studentVector, targetVector);
+  const rawScore = totalWeight > 0 ? totalWeightedScore / totalWeight : 0;
+  const matchScore = Math.min(100, Math.max(0, Math.round(rawScore)));
+  const meetsMinCgpa = studentCgpa != null ? studentCgpa >= minCgpa : true;
+
+  return {
+    matchScore,
+    vectorMatchScore: matchScore,
+    cosineSimilarity,
+    meetsMandatorySkills: meetsMandatory,
+    meetsMinCgpa,
+    matchedSkills,
+  };
+}
+

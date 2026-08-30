@@ -11,6 +11,7 @@ import { AddSkillModal } from "@/components/student/AddSkillModal";
 import { SkillGapMatrix } from "@/components/student/SkillGapMatrix";
 import { TargetRoleSelector } from "@/components/student/TargetRoleSelector";
 import { RoadmapTimeline } from "@/components/student/RoadmapTimeline";
+import { JobMatchesList } from "@/components/student/JobMatchesList";
 import {
   GraduationCap,
   Award,
@@ -32,19 +33,21 @@ import {
   AlertTriangle,
   AlertOctagon,
   BrainCircuit,
+  Briefcase,
 } from "lucide-react";
 
 export default function StudentDashboardPage() {
   const { user, logout } = useAuth();
   const profile = user?.studentProfile;
 
-  // Active View Tab: "ROADMAP_GAP" | "SKILL_MATRIX"
-  const [activeTab, setActiveTab] = useState<"ROADMAP_GAP" | "SKILL_MATRIX">("ROADMAP_GAP");
+  // Active View Tab: "ROADMAP_GAP" | "JOB_MATCHES" | "SKILL_MATRIX"
+  const [activeTab, setActiveTab] = useState<"ROADMAP_GAP" | "JOB_MATCHES" | "SKILL_MATRIX">("ROADMAP_GAP");
 
   const [skills, setSkills] = useState<any[]>([]);
   const [assessments, setAssessments] = useState<any[]>([]);
   const [targetRoles, setTargetRoles] = useState<any[]>([]);
   const [roadmapData, setRoadmapData] = useState<any | null>(null);
+  const [jobs, setJobs] = useState<any[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isGeneratingRoadmap, setIsGeneratingRoadmap] = useState(false);
@@ -56,18 +59,20 @@ export default function StudentDashboardPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [skillsRes, assessmentsRes, rolesRes, roadmapRes] = await Promise.all([
+      const [skillsRes, assessmentsRes, rolesRes, roadmapRes, jobsRes] = await Promise.all([
         fetch("/api/v1/skills"),
         fetch("/api/v1/assessments"),
         fetch("/api/v1/roadmaps/targets"),
         fetch("/api/v1/roadmaps"),
+        fetch("/api/v1/jobs"),
       ]);
 
-      const [skillsJson, assessmentsJson, rolesJson, roadmapJson] = await Promise.all([
+      const [skillsJson, assessmentsJson, rolesJson, roadmapJson, jobsJson] = await Promise.all([
         skillsRes.json(),
         assessmentsRes.json(),
         rolesRes.json(),
         roadmapRes.json(),
+        jobsRes.json(),
       ]);
 
       if (skillsJson.success && skillsJson.data) {
@@ -86,6 +91,9 @@ export default function StudentDashboardPage() {
         } else if (rolesJson.data && rolesJson.data.length > 0) {
           setSelectedRoleId(rolesJson.data[0].id);
         }
+      }
+      if (jobsJson.success && jobsJson.data?.jobs) {
+        setJobs(jobsJson.data.jobs);
       }
     } catch (e) {
       console.error("Error loading student telemetry:", e);
@@ -141,6 +149,27 @@ export default function StudentDashboardPage() {
     }
   };
 
+  const handleApplyJob = async (jobId: string) => {
+    try {
+      const res = await fetch("/api/v1/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId }),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setJobs((prev) =>
+          prev.map((j) =>
+            j.id === jobId ? { ...j, isApplied: true, applicationStatus: "APPLIED" } : j
+          )
+        );
+      }
+    } catch (e) {
+      console.error("Error applying for job opening:", e);
+    }
+  };
+
   const handleLaunchAssessment = (testId: string) => {
     setActiveTestId(testId);
     setIsTestModalOpen(true);
@@ -151,8 +180,6 @@ export default function StudentDashboardPage() {
 
   const fitScore = roadmapData?.overallFitScore ?? 89;
   const cosineScore = roadmapData?.cosineSimilarity ?? 0.948;
-  const criticalGaps = roadmapData?.criticalGapsCount ?? 0;
-  const moderateGaps = roadmapData?.moderateGapsCount ?? 0;
 
   return (
     <AuthGuard allowedRoles={["STUDENT"]}>
@@ -205,7 +232,7 @@ export default function StudentDashboardPage() {
         </div>
 
         {/* View Switcher Tabs */}
-        <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+        <div className="flex flex-wrap items-center gap-2 border-b border-white/10 pb-2">
           <button
             onClick={() => setActiveTab("ROADMAP_GAP")}
             className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 ${
@@ -215,7 +242,19 @@ export default function StudentDashboardPage() {
             }`}
           >
             <Compass size={15} />
-            Phase 4: AI Skill-Gap Analysis & Learning Roadmaps
+            Phase 4: AI Skill-Gap Analysis & Roadmaps
+          </button>
+
+          <button
+            onClick={() => setActiveTab("JOB_MATCHES")}
+            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 ${
+              activeTab === "JOB_MATCHES"
+                ? "bg-primary-500 text-white shadow-glow"
+                : "text-slate-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <Briefcase size={15} />
+            Phase 5: AI-Matched Opportunities ({jobs.length})
           </button>
 
           <button
@@ -227,7 +266,7 @@ export default function StudentDashboardPage() {
             }`}
           >
             <BarChart3 size={15} />
-            Phase 3: Skill Radar & Adaptive Assessments
+            Phase 3: Skill Radar & Adaptive Tests
           </button>
         </div>
 
@@ -273,7 +312,6 @@ export default function StudentDashboardPage() {
         {/* ---------------------------------------------------- */}
         {activeTab === "ROADMAP_GAP" && (
           <div className="space-y-6">
-            {/* Target Role Selector */}
             <TargetRoleSelector
               roles={targetRoles}
               selectedRoleId={selectedRoleId}
@@ -282,7 +320,6 @@ export default function StudentDashboardPage() {
               isGenerating={isGeneratingRoadmap}
             />
 
-            {/* AI Vector Gap Synthesis Narrative */}
             {roadmapData?.gapSummary && (
               <div className="p-5 rounded-3xl glass-panel border border-primary-500/30 bg-primary-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-3.5">
@@ -319,7 +356,6 @@ export default function StudentDashboardPage() {
               </div>
             )}
 
-            {/* Visual Skill-Gap Matrix */}
             {roadmapData?.gaps && (
               <SkillGapMatrix
                 gaps={roadmapData.gaps}
@@ -331,7 +367,6 @@ export default function StudentDashboardPage() {
               />
             )}
 
-            {/* Interactive Learning Roadmap Timeline */}
             {roadmapData && (
               <RoadmapTimeline
                 roadmap={roadmapData}
@@ -342,11 +377,19 @@ export default function StudentDashboardPage() {
         )}
 
         {/* ---------------------------------------------------- */}
-        {/* TAB 2: PHASE 3 SKILL RADAR & ADAPTIVE ASSESSMENTS    */}
+        {/* TAB 2: PHASE 5 AI-MATCHED OPPORTUNITIES & DRIVES     */}
+        {/* ---------------------------------------------------- */}
+        {activeTab === "JOB_MATCHES" && (
+          <div className="space-y-6">
+            <JobMatchesList jobs={jobs} onApply={handleApplyJob} />
+          </div>
+        )}
+
+        {/* ---------------------------------------------------- */}
+        {/* TAB 3: PHASE 3 SKILL RADAR & ADAPTIVE ASSESSMENTS    */}
         {/* ---------------------------------------------------- */}
         {activeTab === "SKILL_MATRIX" && (
           <div className="space-y-6">
-            {/* Radar Chart & Verified OBE Badges */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               <div className="lg:col-span-6">
                 <SkillRadarChart skills={skills} />
@@ -409,7 +452,6 @@ export default function StudentDashboardPage() {
               </div>
             </div>
 
-            {/* Adaptive Assessment Center */}
             <Card className="p-6 space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
@@ -472,7 +514,6 @@ export default function StudentDashboardPage() {
               </div>
             </Card>
 
-            {/* 3-Tier Competency Breakdown Table */}
             <Card className="p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <div>

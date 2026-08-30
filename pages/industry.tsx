@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { AuthGuard } from "@/components/shared/AuthGuard";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { MetricCard } from "@/components/shared/MetricCard";
+import { CandidatesPipeline } from "@/components/recruiter/CandidatesPipeline";
+import { JobListingTable } from "@/components/recruiter/JobListingTable";
+import { PostJobModal } from "@/components/recruiter/PostJobModal";
 import {
   Briefcase,
   Mail,
@@ -13,16 +17,105 @@ import {
   LogOut,
   Sparkles,
   Users,
+  Plus,
+  TrendingUp,
+  BrainCircuit,
+  Filter,
 } from "lucide-react";
+import { JobPostingItem, CandidateItem } from "@/types";
 
 export default function IndustryDashboardPage() {
   const { user, logout } = useAuth();
   const profile = user?.industryProfile;
 
+  const [jobs, setJobs] = useState<JobPostingItem[]>([]);
+  const [candidates, setCandidates] = useState<CandidateItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [jobsRes, candidatesRes] = await Promise.all([
+        fetch("/api/v1/jobs"),
+        fetch("/api/v1/applications"),
+      ]);
+
+      const jobsJson = await jobsRes.json();
+      const candidatesJson = await candidatesRes.json();
+
+      if (jobsJson.success && jobsJson.data?.jobs) {
+        setJobs(jobsJson.data.jobs);
+      }
+      if (candidatesJson.success && candidatesJson.data?.candidates) {
+        setCandidates(candidatesJson.data.candidates);
+      }
+    } catch (e) {
+      console.error("Error loading recruiter telemetry:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleCreateJob = async (newJobData: any) => {
+    try {
+      const res = await fetch("/api/v1/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newJobData),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        await loadData();
+      }
+    } catch (e) {
+      console.error("Error posting job opening:", e);
+    }
+  };
+
+  const handleAdvanceCandidate = async (candidateId: string, nextStatus: string) => {
+    try {
+      const res = await fetch("/api/v1/applications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ candidateId, status: nextStatus }),
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setCandidates((prev) =>
+          prev.map((c) =>
+            c.id === candidateId || c.studentId === candidateId
+              ? { ...c, status: nextStatus.toUpperCase() }
+              : c
+          )
+        );
+      }
+    } catch (e) {
+      console.error("Error advancing candidate:", e);
+    }
+  };
+
+  const topFitCandidatesCount = candidates.filter(
+    (c) => (c.matchScore || c.vectorMatchScore || 0) >= 85
+  ).length;
+
+  const shortlistedCount = candidates.filter(
+    (c) =>
+      c.status.toLowerCase() === "shortlisted" ||
+      c.status.toLowerCase() === "technical_interview" ||
+      c.status.toLowerCase() === "interview"
+  ).length;
+
   return (
-    <AuthGuard allowedRoles={["INDUSTRY"]}>
-      <div className="space-y-6 max-w-5xl mx-auto py-4">
-        {/* Header Profile Banner */}
+    <AuthGuard allowedRoles={["INDUSTRY", "ADMIN"]}>
+      <div className="space-y-6 max-w-6xl mx-auto py-2">
+        {/* Recruiter Header Profile Banner */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-6 rounded-3xl border border-white/10 relative overflow-hidden">
           <div className="flex items-center gap-4">
             <img
@@ -37,79 +130,83 @@ export default function IndustryDashboardPage() {
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-extrabold text-white">{user?.name}</h1>
                 <Badge variant="cyan" size="md">
-                  <Briefcase size={13} /> Industry Partner Portal
+                  <Briefcase size={13} /> {profile?.companyName || "Microsoft India / TechCorp"}
                 </Badge>
               </div>
-              <p className="text-xs text-slate-300 flex items-center gap-2 mt-1">
-                <span className="flex items-center gap-1"><Mail size={12} className="text-slate-400" /> {user?.email}</span>
+              <p className="text-xs text-slate-300 flex flex-wrap items-center gap-2 mt-1">
+                <span>{profile?.designation || "Principal Technical Recruiter"}</span>
+                <span>•</span>
+                <span className="text-slate-400">{profile?.domain || "Cloud & AI Platforms"}</span>
                 <span>•</span>
                 <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                  <ShieldCheck size={12} /> Verified Corporate Partner
+                  <ShieldCheck size={12} /> Verified Industry Partner
                 </span>
               </p>
             </div>
           </div>
 
-          <Button variant="outline" size="sm" onClick={logout} icon={<LogOut size={14} />}>
-            Sign Out
-          </Button>
-        </div>
-
-        {/* Corporate Details */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="p-5 space-y-2 border border-white/5">
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Building size={14} className="text-cyan-400" /> Company / Organization
-            </span>
-            <h3 className="text-base font-bold text-white">
-              {profile?.companyName || "Microsoft India / TechCorp"}
-            </h3>
-            <p className="text-xs text-slate-400">{profile?.domain || "Software & Cloud Systems"}</p>
-          </Card>
-
-          <Card className="p-5 space-y-2 border border-white/5">
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Globe size={14} className="text-indigo-400" /> Company Website
-            </span>
-            <a
-              href={profile?.companyWebsite || "https://example.com"}
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm font-bold text-accent-cyan hover:underline truncate block"
+          <div className="flex items-center gap-2.5 self-start sm:self-center">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setIsPostModalOpen(true)}
+              icon={<Plus size={15} />}
             >
-              {profile?.companyWebsite || "https://example.com"}
-            </a>
-            <p className="text-xs text-slate-400">Verified Corporate URL</p>
-          </Card>
-
-          <Card className="p-5 space-y-2 border border-white/5">
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Users size={14} className="text-emerald-400" /> Recruiter Designation
-            </span>
-            <h3 className="text-base font-bold text-white">
-              {profile?.designation || "Principal Technical Recruiter"}
-            </h3>
-            <p className="text-xs text-slate-400">Campus Talent Acquisition</p>
-          </Card>
+              Post Industry Opening
+            </Button>
+            <Button variant="outline" size="sm" onClick={logout} icon={<LogOut size={13} />}>
+              Sign Out
+            </Button>
+          </div>
         </div>
 
-        {/* Phase 2 Status Notice */}
-        <Card className="p-6 rounded-2xl border border-cyan-500/20 bg-cyan-950/10 space-y-3">
-          <div className="flex items-center gap-2">
-            <Sparkles className="text-accent-cyan w-5 h-5" />
-            <h3 className="text-base font-bold text-white">Phase 2: Authentication & Role Verification Active</h3>
-          </div>
-          <p className="text-xs text-slate-300 leading-relaxed">
-            Your Industry recruiter session is authenticated and isolated. In subsequent phases, this dashboard will host the full skill-weighted job posting engine, ATS pipeline Kanban, and sub-50ms candidate vector matching.
-          </p>
-          <div className="pt-2 flex items-center gap-2 text-xs text-slate-400">
-            <span className="font-semibold text-slate-200">Authenticated Role:</span>
-            <Badge variant="cyan" size="sm">INDUSTRY</Badge>
-            <span>•</span>
-            <span className="font-semibold text-slate-200">Account ID:</span>
-            <span className="font-mono text-[11px] text-slate-300">{user?.id}</span>
-          </div>
-        </Card>
+        {/* Recruiter Live Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <MetricCard
+            title="Active Job Drives"
+            value={jobs.length}
+            subtext="Campus & Off-Campus Hiring"
+            icon={<Briefcase size={18} />}
+            iconBg="bg-indigo-500/15 text-indigo-400 border border-indigo-500/30"
+          />
+          <MetricCard
+            title="Total Applicants"
+            value={candidates.length}
+            trend={{ value: "+24 today", positive: true }}
+            icon={<Users size={18} />}
+            iconBg="bg-cyan-500/15 text-cyan-400 border border-cyan-500/30"
+          />
+          <MetricCard
+            title="Top Vector Matches (>85%)"
+            value={topFitCandidatesCount}
+            subtext="Tier-1 Verified Competency"
+            icon={<BrainCircuit size={18} />}
+            iconBg="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+          />
+          <MetricCard
+            title="Shortlisted Pipeline"
+            value={shortlistedCount}
+            subtext="Ready for Tech Interview"
+            icon={<TrendingUp size={18} />}
+            iconBg="bg-amber-500/15 text-amber-400 border border-amber-500/30"
+          />
+        </div>
+
+        {/* ATS Candidates Pipeline Tracker */}
+        <CandidatesPipeline
+          candidates={candidates}
+          onAdvance={handleAdvanceCandidate}
+        />
+
+        {/* Active Job Drives Table */}
+        <JobListingTable jobs={jobs} />
+
+        {/* Post Job Modal */}
+        <PostJobModal
+          isOpen={isPostModalOpen}
+          onClose={() => setIsPostModalOpen(false)}
+          onJobCreated={handleCreateJob}
+        />
       </div>
     </AuthGuard>
   );

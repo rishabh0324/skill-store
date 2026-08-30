@@ -32,16 +32,42 @@ Aligned with **NEP 2020 (National Education Policy)** and **Outcome-Based Educat
 
 ---
 
-## 🎯 Current Implementation Status
+## 🎯 Implementation Status
 
 | Phase | Description | Key Modules | Status |
 | :--- | :--- | :--- | :--- |
 | **Phase 1** | Project Architecture & Core Design System | Next.js 14, Tailwind Glassmorphism, Prisma ORM, REST API Envelope | ✅ **Completed** |
 | **Phase 2** | Authentication & Role-Based Access Control | 5 Roles, Bcrypt Hashing, JWT Cookies, Dynamic Register, `AuthGuard` | ✅ **Completed** |
 | **Phase 3** | Student Skill Mapping & Adaptive Assessments | Master Skill Taxonomy, Anti-Cheat Tests, Automated Grading, OBE Badges, Public Portfolios | ✅ **Completed** |
-| **Phase 4** | **AI Skill-Gap Analysis & Learning Roadmaps** | **Vector Distance Engine, Cosine Matching, Curated Milestone Checklists, DB Persistence** | ✅ **Completed** |
-| **Phase 5** | Recruiter Job Drives & Vector ATS Matching | Skill-Weighted Opening Creator, Sub-50ms Candidate Search, ATS Kanban | ⏳ Upcoming |
+| **Phase 4** | AI Skill-Gap Analysis & Learning Roadmaps | Vector Distance Engine, Cosine Matching, Curated Milestone Checklists, DB Persistence | ✅ **Completed** |
+| **Phase 5** | **Recruiter Job Drives & Vector ATS Matching** | **Skill-Weighted Opening Creator, Sub-50ms Candidate Search, ATS Kanban, 1-Click Apply** | ✅ **Completed** |
 | **Phase 6** | Faculty Mentorship & Institutional Analytics | Guidance Scheduler, Curriculum Advisory Telemetry, NAAC/NIRF Exports | ⏳ Upcoming |
+
+---
+
+## 🚀 Phase 5: Recruiter Job Drives & Vector ATS Matching
+
+Phase 5 connects corporate industry talent acquisition leads with student candidates through zero-latency vector ranking and automated ATS workflows:
+
+1. **Skill-Weighted Opening Creator**:
+   - Recruiters can publish internship and full-time hiring drives.
+   - Dynamic competency weighting matrix: assigns importance weights ($1 - 5$), minimum proficiency thresholds ($0 - 100\%$), and mandatory skill flags.
+
+2. **Sub-50ms Candidate Vector ATS Matcher**:
+   - Evaluates applicant verified credentials, faculty endorsements, and self-reported skills against the opening's required vector.
+   - Computes multi-factor **Cosine Similarity & Weighted Match Percentage** ($0 - 100\%$) and verifies CGPA eligibility.
+
+3. **Interactive ATS Pipeline Kanban & Candidate Tracker**:
+   - 5-stage recruitment funnel: `APPLIED` $\rightarrow$ `UNDER_REVIEW` $\rightarrow$ `SHORTLISTED` $\rightarrow$ `TECHNICAL_INTERVIEW` $\rightarrow$ `OFFERED`.
+   - Real-time stage advancement, search, match score filtering, and direct links to public verified OBE portfolios (`/p/[username]`).
+
+4. **Student Job Discovery & 1-Click Application Engine**:
+   - Students see opportunities ranked by personalized AI match scores.
+   - 1-Click application submission with live status tracking.
+
+5. **Prisma Database Schema & REST APIs**:
+   - `JobPosting` and `JobApplication` models synchronized to SQLite.
+   - REST endpoints: `GET/POST /api/v1/jobs`, `GET /api/v1/jobs/[id]`, and `GET/POST/PATCH /api/v1/applications`.
 
 ---
 
@@ -63,7 +89,6 @@ Phase 4 delivers the AI-powered vector comparison and learning pathway engine:
    - Automatically synthesizes prioritized recovery milestone checklists targeting candidate-specific deficits.
    - Direct integration with curated high-yield video courses, hands-on GitHub projects, official documentation, interactive labs, and capstone blueprints.
    - Real-time interactive milestone checkbox toggling via `PATCH /api/v1/roadmaps/steps/[id]` with persistent progress percentage updates.
-   - Filter milestones by completion status (*All*, *In Progress*, *Completed*).
 
 ---
 
@@ -75,20 +100,15 @@ Phase 3 introduces the student competency and evaluation engine:
    - Master skill directory across *Languages, Frameworks, Databases, Cloud & DevOps, AI/ML, and Core Engineering*.
    - 3-Tier verification funnel: `SELF_REPORTED` $\rightarrow$ `ASSESSMENT_VERIFIED` $\rightarrow$ `FACULTY_ENDORSED`.
    - Dynamic polar radar visualization with live Recharts integration.
-   - Interactive modal to self-report emerging competencies.
 
 2. **Adaptive Proctored Test Engine**:
    - Timed countdown tests with anti-cheat browser tab-switch detection.
-   - Randomized question banks with sanitized client delivery.
    - Automated instant evaluation ($\ge 70\%$ passing threshold).
    - Upgrades database skills to `ASSESSMENT_VERIFIED` and awards verified digital badges upon passing.
-   - Full question-by-question review with explanations.
 
 3. **Public Verified Student Portfolio (`/p/[username]`)**:
    - Publicly accessible profile for recruiters and LinkedIn showcase.
    - Verifiable OBE Badges with cryptographic verification IDs.
-   - Live competency radar comparing student metrics with industry benchmarks.
-   - Verified GitHub capstone projects and academic credentials.
    - Print & PDF-ready resume format.
 
 ---
@@ -120,8 +140,9 @@ d:\sih#44\
 │   ├── register.tsx            # Dynamic role-based registration form
 │   ├── forgot-password.tsx     # Forgot password request page
 │   ├── reset-password.tsx      # Reset password form with token verification
-│   ├── student.tsx             # Student Dashboard (Live Radar, Skills, Test Center)
-│   ├── industry.tsx            # Industry Dashboard (Protected: INDUSTRY)
+│   ├── student.tsx             # Student Dashboard (Live Radar, Skills, Test Center, Roadmaps, Job Matches)
+│   ├── industry.tsx            # Industry Recruiter Dashboard (Protected: INDUSTRY, Vector ATS, Drives)
+│   ├── recruiter.tsx           # Industry Recruiter Desk alias
 │   ├── faculty.tsx             # Faculty Dashboard (Protected: FACULTY)
 │   ├── institution.tsx         # Institution Dashboard (Protected: INSTITUTION)
 │   ├── admin.tsx               # System Admin Dashboard (Protected: ADMIN)
@@ -141,19 +162,24 @@ d:\sih#44\
 │       │   └── [id]/submit.ts  # Test grading, score calc & badge award
 │       ├── portfolio/
 │       │   └── [username].ts   # Public verified student portfolio endpoint
-│       ├── roadmaps.ts         # Gap recovery milestone tracking
-│       ├── jobs.ts             # Job listings & recruiter openings
-│       ├── applications.ts     # ATS candidate status advancement
+│       ├── roadmaps/
+│       │   ├── index.ts        # Active roadmap & AI vector gap analysis
+│       │   ├── targets.ts      # Target career tracks
+│       │   └── steps/[id].ts   # Milestone checkbox toggle & progress recalculation
+│       ├── jobs/
+│       │   ├── index.ts        # Job listings & skill-weighted opening creator
+│       │   └── [id].ts         # Job drive details & applicant pool
+│       ├── applications.ts     # ATS candidate status advancement & 1-click apply
 │       ├── mentorship.ts       # Guidance slot booking & confirmation
 │       └── analytics.ts        # Institutional KPI aggregation
 ├── prisma/
-│   ├── schema.prisma           # Prisma Schema (Users, Skills, Tests, Badges, Projects)
-│   ├── seed.js                 # Seeder with 5 roles, 10+ skills & question banks
+│   ├── schema.prisma           # Prisma Schema (Users, Skills, Tests, Roadmaps, JobPostings, Applications)
+│   ├── seed.js                 # Seeder with 5 roles, skills, tests, roadmaps, job drives
 │   └── dev.db                  # Local SQLite database
 ├── src/
 │   ├── components/
 │   │   ├── shared/             # Navbar, RoleSwitcher, AuthGuard, MetricCard
-│   │   ├── student/            # SkillRadarChart, ProctoredAssessmentModal, AddSkillModal
+│   │   ├── student/            # SkillRadarChart, ProctoredAssessmentModal, SkillGapMatrix, TargetRoleSelector, RoadmapTimeline, JobMatchesList
 │   │   ├── recruiter/          # CandidatesPipeline, PostJobModal, JobListingTable
 │   │   ├── faculty/            # MentorshipSchedule, CurriculumAdvisory
 │   │   ├── tpo/                # PlacementTrendsChart, DepartmentBreakdown
@@ -163,12 +189,15 @@ d:\sih#44\
 │   ├── lib/
 │   │   ├── auth.ts             # Auth utilities (bcrypt, JWT, session retrieval)
 │   │   ├── prisma.ts           # Prisma Client singleton
+│   │   ├── vectorMatching.ts   # Vector cosine similarity, AI gaps & ATS candidate ranking
 │   │   ├── mockData.ts         # Platform fixtures & domain datasets
 │   │   └── apiResponse.ts      # Standardized JSON response envelope
 │   └── types/
 │       └── index.ts            # TypeScript interfaces & domain models
 ├── test_phase2_auth.js         # Automated 13-step Auth & RBAC test suite
 ├── test_phase3_skills_assessments.js # Automated 11-step Skills & Tests test suite
+├── test_phase4_gap_roadmaps.js # Automated 13-step AI Gap & Roadmaps test suite
+├── test_phase5_recruiter_ats.js # Automated 14-step Recruiter & Vector ATS test suite
 ├── package.json
 └── tsconfig.json
 ```
@@ -191,7 +220,7 @@ npm install
 # Push schema to local SQLite database
 npx prisma db push
 
-# Seed 5 user personas, master skills, and test question banks
+# Seed 5 user personas, master skills, tests, roadmaps, and job drives
 node prisma/seed.js
 ```
 
@@ -205,6 +234,9 @@ node test_phase3_skills_assessments.js
 
 # Phase 4 AI Skill-Gap Analysis & Learning Roadmaps Tests
 node test_phase4_gap_roadmaps.js
+
+# Phase 5 Recruiter Job Drives & Vector ATS Tests
+node test_phase5_recruiter_ats.js
 ```
 
 ### Step 4: Launch Development Server

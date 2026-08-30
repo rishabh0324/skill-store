@@ -46,6 +46,7 @@ model StudentProfile {
   skills         StudentSkill[]
   projects       PortfolioProject[]
   roadmaps       LearningRoadmap[]
+  applications   JobApplication[]
 }
 
 model IndustryProfile {
@@ -59,6 +60,8 @@ model IndustryProfile {
   isVerified     Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  jobPostings    JobPosting[]
 }
 
 model FacultyProfile {
@@ -247,4 +250,44 @@ model RoadmapMilestone {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 }
+
+// ----------------------------------------------------
+// PHASE 5 MODELS: RECRUITER ATS & JOB DRIVES
+// ----------------------------------------------------
+
+model JobPosting {
+  id                 String           @id @default(cuid())
+  industryProfileId  String
+  industryProfile    IndustryProfile  @relation(fields: [industryProfileId], references: [id], onDelete: Cascade)
+  title              String
+  description        String?
+  jobType            String           @default("INTERNSHIP") // INTERNSHIP, FULL_TIME, APPRENTICESHIP
+  location           String           @default("Bengaluru / Hybrid")
+  stipendSalary      String           @default("₹60,000/mo")
+  minCgpa            Float            @default(7.5)
+  deadline           DateTime?
+  status             String           @default("OPEN") // OPEN, CLOSED, FILLED
+  requiredSkillsJson String           // JSON Array: [{ name: "React.js", weight: 5, minBenchmark: 80, isMandatory: true }]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  applications       JobApplication[]
+}
+
+model JobApplication {
+  id               String         @id @default(cuid())
+  jobPostingId     String
+  jobPosting       JobPosting     @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  studentProfileId String
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  status           String         @default("APPLIED") // APPLIED, UNDER_REVIEW, SHORTLISTED, TECHNICAL_INTERVIEW, OFFERED, REJECTED
+  vectorMatchScore Float          @default(85.0) // 0 - 100%
+  matchScore       Float          @default(85.0)
+  notes            String?
+  appliedAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@unique([jobPostingId, studentProfileId])
+}
+
 
