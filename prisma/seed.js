@@ -521,7 +521,211 @@ async function main() {
     },
   });
 
-  console.log("✅ Phase 3 Master Skills & Assessments Seeded Successfully!");
+  // 7. Phase 4 Target Career Roles
+  console.log("🎯 Seeding Phase 4 Master Target Roles & Industry Competency Vectors...");
+
+  const targetRolesData = [
+    {
+      title: "Full-Stack AI Solutions Architect",
+      slug: "fullstack-ai-architect",
+      category: "Software & AI",
+      description: "Architect end-to-end intelligent systems integrating modern React/Next.js client portals, async Python microservices, vector search engines, and resilient relational datastores.",
+      avgSalaryRange: "₹24 - ₹38 LPA",
+      industryDemandLevel: "CRITICAL",
+      icon: "Sparkles",
+      requiredSkills: [
+        { name: "React.js & Next.js", minBenchmark: 85, weight: 5, isMandatory: true, category: "Frameworks" },
+        { name: "Python & Fast-API", minBenchmark: 80, weight: 5, isMandatory: true, category: "Languages" },
+        { name: "PostgreSQL & Prisma ORM", minBenchmark: 75, weight: 4, isMandatory: true, category: "Databases" },
+        { name: "Docker & Containerization", minBenchmark: 80, weight: 4, isMandatory: false, category: "Cloud & DevOps" },
+        { name: "Machine Learning & PyTorch", minBenchmark: 75, weight: 3, isMandatory: false, category: "AI / ML" },
+        { name: "Redis & Distributed Caching", minBenchmark: 70, weight: 3, isMandatory: false, category: "Databases" },
+        { name: "Data Structures & Algorithms", minBenchmark: 85, weight: 4, isMandatory: true, category: "Core Engineering" },
+      ],
+    },
+    {
+      title: "Cloud DevOps & Platform Engineer",
+      slug: "cloud-devops-engineer",
+      category: "Cloud & DevOps",
+      description: "Build robust CI/CD deployment pipelines, container orchestration meshes, multi-region Kubernetes clusters, and automated infrastructure as code (IaC).",
+      avgSalaryRange: "₹20 - ₹34 LPA",
+      industryDemandLevel: "VERY HIGH",
+      icon: "Cloud",
+      requiredSkills: [
+        { name: "Docker & Containerization", minBenchmark: 85, weight: 5, isMandatory: true, category: "Cloud & DevOps" },
+        { name: "Kubernetes & Cloud Infra", minBenchmark: 80, weight: 5, isMandatory: true, category: "Cloud & DevOps" },
+        { name: "Python & Fast-API", minBenchmark: 75, weight: 4, isMandatory: false, category: "Languages" },
+        { name: "PostgreSQL & Prisma ORM", minBenchmark: 70, weight: 3, isMandatory: false, category: "Databases" },
+        { name: "Redis & Distributed Caching", minBenchmark: 75, weight: 3, isMandatory: false, category: "Databases" },
+        { name: "Data Structures & Algorithms", minBenchmark: 75, weight: 3, isMandatory: false, category: "Core Engineering" },
+      ],
+    },
+    {
+      title: "Data Scientist & ML Specialist",
+      slug: "data-scientist-ml-specialist",
+      category: "Data & ML",
+      description: "Train and evaluate deep learning representations, implement vector retrieval pipelines, fine-tune transformer models, and optimize high-throughput inferencing.",
+      avgSalaryRange: "₹22 - ₹36 LPA",
+      industryDemandLevel: "VERY HIGH",
+      icon: "Brain",
+      requiredSkills: [
+        { name: "Machine Learning & PyTorch", minBenchmark: 85, weight: 5, isMandatory: true, category: "AI / ML" },
+        { name: "Python & Fast-API", minBenchmark: 85, weight: 5, isMandatory: true, category: "Languages" },
+        { name: "PostgreSQL & Prisma ORM", minBenchmark: 75, weight: 3, isMandatory: false, category: "Databases" },
+        { name: "Data Structures & Algorithms", minBenchmark: 80, weight: 4, isMandatory: true, category: "Core Engineering" },
+        { name: "Docker & Containerization", minBenchmark: 70, weight: 3, isMandatory: false, category: "Cloud & DevOps" },
+      ],
+    },
+    {
+      title: "Distributed Backend Systems Engineer",
+      slug: "distributed-backend-engineer",
+      category: "Systems & Security",
+      description: "Design fault-tolerant distributed services, high-concurrency event streams, transaction isolation levels, and ultra-low latency caching layers.",
+      avgSalaryRange: "₹22 - ₹40 LPA",
+      industryDemandLevel: "CRITICAL",
+      icon: "Cpu",
+      requiredSkills: [
+        { name: "Python & Fast-API", minBenchmark: 85, weight: 5, isMandatory: true, category: "Languages" },
+        { name: "PostgreSQL & Prisma ORM", minBenchmark: 85, weight: 5, isMandatory: true, category: "Databases" },
+        { name: "Redis & Distributed Caching", minBenchmark: 80, weight: 4, isMandatory: true, category: "Databases" },
+        { name: "Data Structures & Algorithms", minBenchmark: 90, weight: 5, isMandatory: true, category: "Core Engineering" },
+        { name: "Docker & Containerization", minBenchmark: 80, weight: 4, isMandatory: false, category: "Cloud & DevOps" },
+        { name: "Kubernetes & Cloud Infra", minBenchmark: 70, weight: 3, isMandatory: false, category: "Cloud & DevOps" },
+      ],
+    },
+  ];
+
+  const seededRoles = {};
+  for (const tr of targetRolesData) {
+    const record = await prisma.targetRole.upsert({
+      where: { title: tr.title },
+      update: {
+        slug: tr.slug,
+        category: tr.category,
+        description: tr.description,
+        avgSalaryRange: tr.avgSalaryRange,
+        industryDemandLevel: tr.industryDemandLevel,
+        icon: tr.icon,
+        requiredSkillsJson: JSON.stringify(tr.requiredSkills),
+      },
+      create: {
+        title: tr.title,
+        slug: tr.slug,
+        category: tr.category,
+        description: tr.description,
+        avgSalaryRange: tr.avgSalaryRange,
+        industryDemandLevel: tr.industryDemandLevel,
+        icon: tr.icon,
+        requiredSkillsJson: JSON.stringify(tr.requiredSkills),
+      },
+    });
+    seededRoles[tr.title] = record;
+  }
+
+  // 8. Seed Default Active Learning Roadmap for Student Aarav Sharma
+  const defaultRole = seededRoles["Full-Stack AI Solutions Architect"];
+  
+  const studentRoadmap = await prisma.learningRoadmap.upsert({
+    where: {
+      studentProfileId_roleTitle: {
+        studentProfileId: studentProfile.id,
+        roleTitle: defaultRole.title,
+      },
+    },
+    update: {
+      targetRoleId: defaultRole.id,
+      roleCategory: defaultRole.category,
+      overallFitScore: 89.0,
+      cosineSimilarity: 0.948,
+      gapSummary: "Vector Cosine Match: 94.8% (89% Overall Target Fit). Strong foundations demonstrated in React.js & Next.js, Python & Fast-API, Data Structures & Algorithms. Priority attention required in Docker & Containerization and Machine Learning & PyTorch to reach Tier-1 recruiter shortlisting thresholds.",
+      estimatedWeeks: 4,
+      estimatedHours: 36,
+      progressPercent: 50.0,
+      status: "ACTIVE",
+    },
+    create: {
+      studentProfileId: studentProfile.id,
+      targetRoleId: defaultRole.id,
+      roleTitle: defaultRole.title,
+      roleCategory: defaultRole.category,
+      overallFitScore: 89.0,
+      cosineSimilarity: 0.948,
+      gapSummary: "Vector Cosine Match: 94.8% (89% Overall Target Fit). Strong foundations demonstrated in React.js & Next.js, Python & Fast-API, Data Structures & Algorithms. Priority attention required in Docker & Containerization and Machine Learning & PyTorch to reach Tier-1 recruiter shortlisting thresholds.",
+      estimatedWeeks: 4,
+      estimatedHours: 36,
+      progressPercent: 50.0,
+      status: "ACTIVE",
+    },
+  });
+
+  // Clear existing milestones and insert curated milestones
+  await prisma.roadmapMilestone.deleteMany({
+    where: { roadmapId: studentRoadmap.id },
+  });
+
+  const milestonesToSeed = [
+    {
+      stepNumber: 1,
+      title: "Master Multi-Stage Docker Builds & Microservices Containerization",
+      description: "Learn how to optimize production container images under 100MB with Alpine Linux, layer caching, and multi-stage pipelines.",
+      skillName: "Docker & Containerization",
+      gapDelta: -15.0,
+      resourceType: "VIDEO",
+      resourceUrl: "https://www.youtube.com/watch?v=gAkwW2tuIqE",
+      provider: "freeCodeCamp / Docker Docs",
+      estimatedHours: 8,
+      isCompleted: true,
+      completedAt: new Date(),
+    },
+    {
+      stepNumber: 2,
+      title: "Hands-on Project: Multi-Container Microservice Stack with Docker Compose",
+      description: "Containerize a Next.js frontend, Python FastAPI backend, Redis cache, and PostgreSQL database with health checks and volume persistence.",
+      skillName: "Docker & Containerization",
+      gapDelta: -15.0,
+      resourceType: "PROJECT",
+      resourceUrl: "https://github.com/docker/awesome-compose",
+      provider: "GitHub Labs",
+      estimatedHours: 12,
+      isCompleted: true,
+      completedAt: new Date(),
+    },
+    {
+      stepNumber: 3,
+      title: "PyTorch Deep Learning & Tensor Operations Mastery",
+      description: "Implement custom neural network architectures, backpropagation, and loss optimizers from scratch.",
+      skillName: "Machine Learning & PyTorch",
+      gapDelta: -15.0,
+      resourceType: "COURSE",
+      resourceUrl: "https://pytorch.org/tutorials/beginner/basics/intro.html",
+      provider: "PyTorch Official",
+      estimatedHours: 10,
+      isCompleted: false,
+    },
+    {
+      stepNumber: 4,
+      title: "Capstone Milestone: Production-Grade Full-Stack AI Solutions Architect Showcase Project",
+      description: "Integrate all verified competencies into a deployed, high-availability architecture with comprehensive CI/CD, documentation, and performance benchmarks.",
+      skillName: "System Design & Architecture",
+      gapDelta: 0,
+      resourceType: "CERTIFICATION",
+      resourceUrl: "https://github.com/trending",
+      provider: "NEP 2020 OBE Capstone Evaluation",
+      estimatedHours: 12,
+      isCompleted: false,
+    },
+  ];
+
+  for (const m of milestonesToSeed) {
+    await prisma.roadmapMilestone.create({
+      data: {
+        roadmapId: studentRoadmap.id,
+        ...m,
+      },
+    });
+  }
+
+  console.log("✅ Phase 4 Master Target Roles & Roadmaps Seeded Successfully!");
 }
 
 main()
@@ -532,3 +736,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

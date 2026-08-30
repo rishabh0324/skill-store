@@ -45,6 +45,7 @@ model StudentProfile {
 
   skills         StudentSkill[]
   projects       PortfolioProject[]
+  roadmaps       LearningRoadmap[]
 }
 
 model IndustryProfile {
@@ -184,3 +185,66 @@ model PortfolioProject {
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 }
+
+// ----------------------------------------------------
+// PHASE 4 MODELS: AI SKILL-GAP & LEARNING ROADMAPS
+// ----------------------------------------------------
+
+model TargetRole {
+  id                  String            @id @default(cuid())
+  title               String            @unique
+  slug                String            @unique
+  category            String            // Software & AI, Cloud & DevOps, Data & ML, Systems & Security
+  description         String
+  avgSalaryRange      String            @default("₹18 - ₹32 LPA")
+  industryDemandLevel String            @default("HIGH") // HIGH, VERY HIGH, CRITICAL
+  icon                String?           @default("Sparkles")
+  requiredSkillsJson  String            // JSON Array: [{ name: "React.js & Next.js", minBenchmark: 85, weight: 5, isMandatory: true, category: "Frameworks" }]
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  roadmaps            LearningRoadmap[]
+}
+
+model LearningRoadmap {
+  id               String             @id @default(cuid())
+  studentProfileId String
+  studentProfile   StudentProfile     @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  targetRoleId     String?
+  targetRole       TargetRole?        @relation(fields: [targetRoleId], references: [id], onDelete: SetNull)
+  roleTitle        String
+  roleCategory     String?
+  overallFitScore  Float              @default(0.0) // 0 - 100 percentage
+  cosineSimilarity Float              @default(0.0) // 0 - 1.0
+  gapSummary       String?
+  estimatedWeeks   Int                @default(8)
+  estimatedHours   Int                @default(40)
+  progressPercent  Float              @default(0.0)
+  status           String             @default("ACTIVE") // ACTIVE, COMPLETED, ARCHIVED
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  milestones       RoadmapMilestone[]
+
+  @@unique([studentProfileId, roleTitle])
+}
+
+model RoadmapMilestone {
+  id             String          @id @default(cuid())
+  roadmapId      String
+  roadmap        LearningRoadmap @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+  stepNumber     Int
+  title          String
+  description    String
+  skillName      String
+  gapDelta       Float           @default(0.0)
+  resourceType   String          @default("VIDEO") // VIDEO, PROJECT, ARTICLE, DOCS, CERTIFICATION, LAB
+  resourceUrl    String
+  provider       String?         @default("Coursera")
+  estimatedHours Int             @default(6)
+  isCompleted    Boolean         @default(false)
+  completedAt    DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+

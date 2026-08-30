@@ -144,28 +144,74 @@ export interface AssessmentItem {
   [key: string]: any;
 }
 
+export interface TargetRoleData {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  description: string;
+  avgSalaryRange: string;
+  industryDemandLevel: "HIGH" | "VERY HIGH" | "CRITICAL" | string;
+  icon?: string | null;
+  requiredSkills: {
+    name: string;
+    minBenchmark: number;
+    weight: number;
+    isMandatory: boolean;
+    category?: string;
+  }[];
+}
+
+export interface SkillGapItemData {
+  skillName: string;
+  category: string;
+  studentScore: number;
+  targetBenchmark: number;
+  weight: number;
+  isMandatory: boolean;
+  gapDelta: number;
+  gapStatus: "MATCHED" | "MODERATE_GAP" | "CRITICAL_GAP";
+  verificationStatus: "ASSESSMENT_VERIFIED" | "FACULTY_ENDORSED" | "SELF_REPORTED" | "MISSING";
+  hasAssessment: boolean;
+  assessmentId?: string;
+}
+
 export interface RoadmapStep {
   id: string;
   stepNumber?: number;
   week?: number;
   title: string;
   description: string;
+  skillName?: string;
+  gapDelta?: number;
   resourceType: string;
   resourceUrl: string;
+  provider?: string | null;
   estimatedHours?: number;
   isCompleted: boolean;
+  completedAt?: string | null;
   [key: string]: any;
 }
 
 export interface LearningRoadmapData {
   id: string;
-  targetRole: string;
+  targetRoleId?: string | null;
+  targetRole?: string;
+  roleTitle?: string;
+  roleCategory?: string | null;
+  overallFitScore?: number;
+  cosineSimilarity?: number;
   estimatedWeeks?: number;
   estimatedHours?: number;
   summary?: string;
   gapSummary?: string;
   progressPercent?: number;
+  strengthsCount?: number;
+  moderateGapsCount?: number;
+  criticalGapsCount?: number;
+  gaps?: SkillGapItemData[];
   steps: RoadmapStep[];
+  milestones?: RoadmapStep[];
   [key: string]: any;
 }
 

@@ -38,10 +38,32 @@ Aligned with **NEP 2020 (National Education Policy)** and **Outcome-Based Educat
 | :--- | :--- | :--- | :--- |
 | **Phase 1** | Project Architecture & Core Design System | Next.js 14, Tailwind Glassmorphism, Prisma ORM, REST API Envelope | ✅ **Completed** |
 | **Phase 2** | Authentication & Role-Based Access Control | 5 Roles, Bcrypt Hashing, JWT Cookies, Dynamic Register, `AuthGuard` | ✅ **Completed** |
-| **Phase 3** | **Student Skill Mapping & Adaptive Assessments** | **Master Skill Taxonomy, Anti-Cheat Tests, Automated Grading, OBE Badges, Public Portfolios** | ✅ **Completed** |
-| **Phase 4** | AI Skill-Gap Analysis & Learning Roadmaps | Vector Distance Engine, Cosine Matching, Curated Milestone Checklists | ⏳ Upcoming |
+| **Phase 3** | Student Skill Mapping & Adaptive Assessments | Master Skill Taxonomy, Anti-Cheat Tests, Automated Grading, OBE Badges, Public Portfolios | ✅ **Completed** |
+| **Phase 4** | **AI Skill-Gap Analysis & Learning Roadmaps** | **Vector Distance Engine, Cosine Matching, Curated Milestone Checklists, DB Persistence** | ✅ **Completed** |
 | **Phase 5** | Recruiter Job Drives & Vector ATS Matching | Skill-Weighted Opening Creator, Sub-50ms Candidate Search, ATS Kanban | ⏳ Upcoming |
 | **Phase 6** | Faculty Mentorship & Institutional Analytics | Guidance Scheduler, Curriculum Advisory Telemetry, NAAC/NIRF Exports | ⏳ Upcoming |
+
+---
+
+## 🚀 Phase 4: AI Skill-Gap Analysis & Personalized Learning Roadmaps
+
+Phase 4 delivers the AI-powered vector comparison and learning pathway engine:
+
+1. **Multi-Factor Vector Cosine Similarity Engine**:
+   - Compares multi-dimensional student competency vectors $\vec{S}$ with industry job benchmark vectors $\vec{T}$:
+     $$\text{Cosine Similarity} = \frac{\vec{S} \cdot \vec{T}}{\|\vec{S}\| \|\vec{T}\|}$$
+   - Weighted overall role fit score ($0 - 100\%$) applying tiered multipliers: Verified Assessments (1.0x), Faculty Endorsements (0.95x), Self-Reported (0.85x), and Missing (0.0x).
+   - Classifies competency status into **Strengths / Benchmarks Met** ($\ge 0$), **Moderate Gaps** ($-1\%$ to $-20\%$), and **Critical Gaps** ($<-20\%$ or mandatory deficit).
+
+2. **Master Target Career Roles Catalog**:
+   - Master industry tracks (*Full-Stack AI Solutions Architect*, *Cloud DevOps & Platform Engineer*, *Data Scientist & ML Specialist*, *Distributed Backend Systems Engineer*).
+   - Demand level analytics (`CRITICAL`, `VERY HIGH`), average compensation brackets, and vector dimension weights.
+
+3. **Dynamic Database-Backed Milestone Generator**:
+   - Automatically synthesizes prioritized recovery milestone checklists targeting candidate-specific deficits.
+   - Direct integration with curated high-yield video courses, hands-on GitHub projects, official documentation, interactive labs, and capstone blueprints.
+   - Real-time interactive milestone checkbox toggling via `PATCH /api/v1/roadmaps/steps/[id]` with persistent progress percentage updates.
+   - Filter milestones by completion status (*All*, *In Progress*, *Completed*).
 
 ---
 
@@ -180,6 +202,9 @@ node test_phase2_auth.js
 
 # Phase 3 Skill Mapping & Adaptive Assessments Tests
 node test_phase3_skills_assessments.js
+
+# Phase 4 AI Skill-Gap Analysis & Learning Roadmaps Tests
+node test_phase4_gap_roadmaps.js
 ```
 
 ### Step 4: Launch Development Server
