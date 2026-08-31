@@ -53,7 +53,7 @@ export const Navbar: React.FC = () => {
           <div>
             <div className="flex items-center gap-1.5">
               <span className="font-extrabold text-lg tracking-tight text-white">
-                NEXUS<span className="text-accent-cyan">EDU</span>
+                bridgeNext<span className="text-accent-cyan"> ai</span>
               </span>
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary-500/20 text-primary-300 border border-primary-500/30">
                 SIH'26

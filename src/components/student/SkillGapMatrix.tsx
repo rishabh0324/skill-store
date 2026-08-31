@@ -106,10 +106,10 @@ export const SkillGapMatrix: React.FC<SkillGapMatrixProps> = ({
                         {item.studentScore > 0 ? `${item.studentScore}%` : "—"}
                       </span>
                       {item.verificationStatus === "ASSESSMENT_VERIFIED" && (
-                        <ShieldCheck size={13} className="text-emerald-400" title="Assessment Verified" />
+                        <span title="Assessment Verified"><ShieldCheck size={13} className="text-emerald-400" /></span>
                       )}
                       {item.verificationStatus === "FACULTY_ENDORSED" && (
-                        <Award size={13} className="text-amber-400" title="Faculty Endorsed" />
+                        <span title="Faculty Endorsed"><Award size={13} className="text-amber-400" /></span>
                       )}
                     </div>
                     <span className="text-[9px] text-slate-400 capitalize">

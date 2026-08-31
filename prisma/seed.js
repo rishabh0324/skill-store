@@ -879,7 +879,7 @@ async function main() {
       topic: "Capstone Project Evaluation & Distributed Vector Indexing",
       scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
       durationMinutes: 30,
-      meetingUrl: "https://meet.google.com/nexus-guidance-01",
+      meetingUrl: "https://meet.google.com/bridgenext-guidance-01",
       status: "BOOKED",
     },
   });
@@ -891,7 +891,7 @@ async function main() {
       topic: "Bridging Cloud DevOps Gap & Interview Readiness",
       scheduledAt: new Date(Date.now() + 48 * 60 * 60 * 1000), // Day after tomorrow
       durationMinutes: 45,
-      meetingUrl: "https://meet.google.com/nexus-guidance-02",
+      meetingUrl: "https://meet.google.com/bridgenext-guidance-02",
       status: "AVAILABLE",
     },
   });
@@ -903,7 +903,7 @@ async function main() {
       topic: "Advanced PostgreSQL & Query Optimization Rubrics",
       scheduledAt: new Date(Date.now() + 72 * 60 * 60 * 1000),
       durationMinutes: 30,
-      meetingUrl: "https://meet.google.com/nexus-guidance-03",
+      meetingUrl: "https://meet.google.com/bridgenext-guidance-03",
       status: "AVAILABLE",
     },
   });

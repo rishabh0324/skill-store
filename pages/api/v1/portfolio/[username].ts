@@ -54,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         skillName: s.skill.name,
         score: s.verifiedScore,
         verifiedAt: s.verifiedAt,
-        issuer: "NEXUS EDU National Assessment Engine",
+        issuer: "bridgeNext ai National Assessment Engine",
         obeLevel: s.verifiedScore && s.verifiedScore >= 90 ? "Level 4 (Mastery)" : "Level 3 (Proficient)",
         verificationHash: `OBE-SIH26-${s.id.substring(0, 8).toUpperCase()}`,
       }));

@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎓 NEXUS EDU
+# 🎓 bridgeNext ai
 ### Unified Academia–Industry Collaboration & AI Competency Platform
 **Smart India Hackathon (SIH) 2026 • Problem Statement 44**
 
@@ -26,7 +26,7 @@
 
 Traditional higher education systems face a profound disconnect: university curricula evolve over multi-year cycles while corporate engineering requirements transform continuously. 
 
-**NEXUS EDU** solves this challenge through an authenticated, multi-role digital ecosystem connecting **Students, Corporate Recruiters, Faculty Mentors, and Institutional TPO Administrators**. Aligned with the **National Education Policy (NEP 2020)** and **Outcome-Based Education (OBE)** frameworks, the platform delivers:
+**bridgeNext ai** solves this challenge through an authenticated, multi-role digital ecosystem connecting **Students, Corporate Recruiters, Faculty Mentors, and Institutional TPO Administrators**. Aligned with the **National Education Policy (NEP 2020)** and **Outcome-Based Education (OBE)** frameworks, the platform delivers:
 
 1. **Student Competency Mapping**: Dynamic polar radar visualization with multi-tier verification (`SELF_REPORTED` $\rightarrow$ `ASSESSMENT_VERIFIED` $\rightarrow$ `FACULTY_ENDORSED`).
 2. **AI Skill-Gap & Recovery Roadmaps**: Sub-50ms vector cosine matching ($\cos\theta$) comparing student credentials against industry benchmark vectors to generate actionable, milestone-driven recovery paths.
@@ -40,7 +40,7 @@ Traditional higher education systems face a profound disconnect: university curr
 
 ```
                                ┌─────────────────────────────────────────┐
-                               │       NEXUS EDU Unified Web Gateway     │
+                               │     bridgeNext ai Unified Web Gateway   │
                                │   [Demo Role Switcher] [Auth Context]   │
                                └────────────────────┬────────────────────┘
                                                     │

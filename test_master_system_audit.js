@@ -1,7 +1,7 @@
 /**
  * test_master_system_audit.js
  * Comprehensive Master System Audit & Complete End-to-End Integration Suite
- * Smart India Hackathon 2026 - Problem Statement 44: NEXUS EDU
+ * Smart India Hackathon 2026 - Problem Statement 44: bridgeNext ai
  */
 
 const http = require("http");
@@ -62,7 +62,7 @@ function makeRequest({ path, method = "GET", headers = {}, body = null }) {
 
 async function runMasterAudit() {
   console.log("================================================================================");
-  console.log("🔍 NEXUS EDU — MASTER SYSTEM INTEGRATION & QUALITY AUDIT (SIH 2026 PS-44)");
+  console.log("🔍 bridgeNext ai — MASTER SYSTEM INTEGRATION & QUALITY AUDIT (SIH 2026 PS-44)");
   console.log("================================================================================");
 
   let passed = 0;
@@ -376,7 +376,7 @@ async function runMasterAudit() {
         topic: "Distributed Systems Architecture",
         scheduledAt: new Date(Date.now() + 86400000).toISOString(),
         durationMinutes: 30,
-        meetingUrl: "https://meet.google.com/nexus-test-guidance",
+        meetingUrl: "https://meet.google.com/bridgenext-test-guidance",
       },
     });
     assert(

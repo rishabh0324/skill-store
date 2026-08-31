@@ -65,7 +65,7 @@ export const MentorshipSchedule: React.FC<MentorshipScheduleProps> = ({
           topic,
           scheduledAt,
           durationMinutes: Number(durationMinutes),
-          meetingUrl: `https://meet.google.com/nexus-${Math.random().toString(36).substring(7)}`,
+          meetingUrl: `https://meet.google.com/bridgenext-${Math.random().toString(36).substring(7)}`,
         }),
       });
 

@@ -104,7 +104,7 @@ export default function PublicStudentPortfolioPage() {
               <Badge variant="success" size="sm">NEP 2020 Compliant</Badge>
             </div>
             <p className="text-[11px] text-slate-300">
-              Verified by National Institute of Technology (NIRF Rank #{accreditationProof.institutionNIRFRank}) & NEXUS EDU Engine.
+              Verified by National Institute of Technology (NIRF Rank #{accreditationProof.institutionNIRFRank}) & bridgeNext ai Engine.
             </p>
           </div>
         </div>
@@ -201,7 +201,7 @@ export default function PublicStudentPortfolioPage() {
 
               <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-slate-400 font-mono">
                 <span>Verification Hash: {badge.verificationHash}</span>
-                <span className="text-slate-500">Issuer: NEXUS EDU</span>
+                <span className="text-slate-500">Issuer: bridgeNext ai</span>
               </div>
             </div>
           ))}

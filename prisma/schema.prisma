@@ -308,7 +308,7 @@ model MentorshipSlot {
   topic            String              @default("AI Systems Architecture & Skill Gap Review")
   scheduledAt      DateTime
   durationMinutes  Int                 @default(30)
-  meetingUrl       String              @default("https://meet.google.com/nexus-guidance")
+  meetingUrl       String              @default("https://meet.google.com/bridgenext-guidance")
   status           String              @default("AVAILABLE") // AVAILABLE, BOOKED, COMPLETED, CANCELLED
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt

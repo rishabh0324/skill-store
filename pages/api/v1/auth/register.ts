@@ -183,7 +183,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(201).json({
       success: true,
-      message: "Registration successful! Welcome to NEXUS EDU.",
+      message: "Registration successful! Welcome to bridgeNext ai.",
       data: {
         user: userSession,
         token,

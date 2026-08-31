@@ -179,7 +179,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             topic: topic || "AI Systems Architecture & Skill Gap Review",
             scheduledAt: scheduledAt ? new Date(scheduledAt) : new Date(Date.now() + 48 * 60 * 60 * 1000),
             durationMinutes: Number(durationMinutes) || 30,
-            meetingUrl: meetingUrl || `https://meet.google.com/nexus-${Math.random().toString(36).substring(7)}`,
+            meetingUrl: meetingUrl || `https://meet.google.com/bridgenext-${Math.random().toString(36).substring(7)}`,
             status: "AVAILABLE",
           },
           include: {

@@ -143,7 +143,7 @@ export default function RegisterPage() {
               <Layers className="text-accent-cyan w-6 h-6" />
             </div>
           </div>
-          <h2 className="text-2xl font-black text-white tracking-tight">Create NEXUS EDU Account</h2>
+          <h2 className="text-2xl font-black text-white tracking-tight">Create bridgeNext ai Account</h2>
           <p className="text-xs text-slate-400">Join the SIH 2026 Academia–Industry Collaboration Ecosystem</p>
         </div>
 

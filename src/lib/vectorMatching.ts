@@ -7,7 +7,7 @@ export interface TargetRoleSkillRequirement {
   suggestedResources?: {
     title: string;
     description: string;
-    resourceType: "VIDEO" | "PROJECT" | "ARTICLE" | "DOCS" | "CERTIFICATION" | "LAB";
+    resourceType: "VIDEO" | "PROJECT" | "ARTICLE" | "DOCS" | "CERTIFICATION" | "LAB" | "COURSE";
     resourceUrl: string;
     provider?: string;
     estimatedHours?: number;
@@ -34,7 +34,7 @@ export interface MilestoneDraft {
   description: string;
   skillName: string;
   gapDelta: number;
-  resourceType: "VIDEO" | "PROJECT" | "ARTICLE" | "DOCS" | "CERTIFICATION" | "LAB";
+  resourceType: "VIDEO" | "PROJECT" | "ARTICLE" | "DOCS" | "CERTIFICATION" | "LAB" | "COURSE";
   resourceUrl: string;
   provider: string;
   estimatedHours: number;
@@ -467,7 +467,7 @@ export function generateMilestonesForGaps(gaps: SkillGapItem[], roleTitle: strin
       gapDelta: 0,
       resourceType: "CERTIFICATION",
       resourceUrl: "https://leetcode.com",
-      provider: "Nexus Corporate Fast-Track",
+      provider: "bridgeNext ai Fast-Track",
       estimatedHours: 6,
       isCompleted: true,
     });

@@ -21,7 +21,7 @@ export const AccreditationExportModal: React.FC<AccreditationExportModalProps> =
   const [downloadSuccess, setDownloadSuccess] = useState(false);
 
   const handleDownload = (format: "json" | "csv") => {
-    const filename = `NEXUS_EDU_${activeTab}_Telemetry_${new Date().toISOString().split("T")[0]}.${format}`;
+    const filename = `bridgeNext_ai_${activeTab}_Telemetry_${new Date().toISOString().split("T")[0]}.${format}`;
     let content = "";
 
     if (format === "json") {
