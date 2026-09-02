@@ -14,14 +14,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Match by slug or id or email
-    const formattedName = username.replace(/-/g, " ");
+    const formattedName = username.replace(/-/g, " ").toLowerCase();
 
-    const user = await prisma.user.findFirst({
+    let user = await prisma.user.findFirst({
       where: {
         OR: [
           { id: username },
           { email: username.toLowerCase() },
-          { name: { contains: formattedName } },
+          { name: { contains: username.replace(/-/g, " ") } },
         ],
         role: "STUDENT",
       },
@@ -36,6 +36,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
       },
     });
+
+    // Fallback: search all students in memory if exact match didn't hit
+    if (!user || !user.studentProfile) {
+      const allStudents = await prisma.user.findMany({
+        where: { role: "STUDENT" },
+        include: {
+          studentProfile: {
+            include: {
+              skills: { include: { skill: true } },
+              projects: true,
+            },
+          },
+        },
+      });
+
+      user = allStudents.find(
+        (u) =>
+          u.id === username ||
+          u.email.toLowerCase() === username.toLowerCase() ||
+          u.name.toLowerCase().replace(/\s+/g, "-") === username.toLowerCase() ||
+          u.name.toLowerCase() === formattedName
+      ) || null;
+    }
 
     if (!user || !user.studentProfile) {
       return res.status(404).json({

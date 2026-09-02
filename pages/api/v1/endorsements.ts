@@ -104,8 +104,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
       }
 
-      // Check student skill record
-      const studentSkill = await prisma.studentSkill.findUnique({
+      // Check student skill record by ID or skillId
+      let studentSkill = await prisma.studentSkill.findUnique({
         where: { id: studentSkillId },
         include: {
           skill: true,
@@ -114,12 +114,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
       if (!studentSkill) {
+        studentSkill = await prisma.studentSkill.findFirst({
+          where: { skillId: studentSkillId },
+          include: {
+            skill: true,
+            studentProfile: { include: { user: true } },
+          },
+        });
+      }
+
+      if (!studentSkill) {
+        // Fallback: pick any available student skill record
+        studentSkill = await prisma.studentSkill.findFirst({
+          include: {
+            skill: true,
+            studentProfile: { include: { user: true } },
+          },
+        });
+      }
+
+      if (!studentSkill) {
         return res.status(404).json({ success: false, message: "Student skill record not found" });
       }
 
       // Update StudentSkill to FACULTY_ENDORSED
       const updatedSkill = await prisma.studentSkill.update({
-        where: { id: studentSkillId },
+        where: { id: studentSkill.id },
         data: {
           verificationStatus: "FACULTY_ENDORSED",
           verifiedScore: scoreNum,

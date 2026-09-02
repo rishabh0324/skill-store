@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useAuth } from "@/context/AuthContext";
-import { RoleSwitcher } from "./RoleSwitcher";
 import {
   Layers,
   LogOut,
@@ -65,9 +64,6 @@ export const Navbar: React.FC = () => {
 
         {/* Action Controls */}
         <div className="flex items-center gap-3">
-          {/* Quick Demo Role Switcher for Hackathon Evaluation */}
-          <RoleSwitcher />
-
           {isAuthenticated && user ? (
             <div className="relative">
               <button
@@ -111,6 +107,17 @@ export const Navbar: React.FC = () => {
                       <LayoutDashboard size={14} className="text-primary-400" />
                       <span>My Dashboard</span>
                     </Link>
+
+                    {!user.isOnboarded && (
+                      <Link
+                        href="/onboarding"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-amber-300 hover:bg-amber-500/10 transition-colors"
+                      >
+                        <User size={14} />
+                        <span>Complete Onboarding</span>
+                      </Link>
+                    )}
 
                     <button
                       onClick={() => {

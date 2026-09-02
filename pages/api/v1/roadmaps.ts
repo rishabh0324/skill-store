@@ -104,17 +104,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(404).json({ success: false, message: "Student profile not found" });
       }
 
-      // Check if target role specified in query
-      const { roleTitle, roleId } = req.query;
+      // Check if target role specified in body or query
+      const roleIdParam = req.body?.targetRoleId || req.body?.roleId || req.query?.roleId;
+      const roleTitleParam = req.body?.roleTitle || req.body?.title || req.query?.roleTitle;
 
       let targetRole = null;
-      if (roleId && typeof roleId === "string") {
-        targetRole = await prisma.targetRole.findUnique({ where: { id: roleId } });
-      } else if (roleTitle && typeof roleTitle === "string") {
+      if (roleIdParam && typeof roleIdParam === "string") {
+        targetRole = await prisma.targetRole.findUnique({ where: { id: roleIdParam } });
+      } else if (roleTitleParam && typeof roleTitleParam === "string") {
         targetRole = await prisma.targetRole.findFirst({
           where: {
             title: {
-              contains: roleTitle,
+              contains: roleTitleParam,
             },
           },
         });

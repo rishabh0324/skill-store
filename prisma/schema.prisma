@@ -1,5 +1,5 @@
-// Prisma Schema for SIH 2026 Problem Statement 44: Academia-Industry Collaboration Platform
-// Phase 3: Student Skill Mapping, Adaptive Assessments & OBE Badges
+// Prisma Schema for SIH 2026 Problem Statement 44: bridgeNext ai / Skill Store
+// Real Multi-Role Authentication, Onboarding & Competency Ecosystem
 
 generator client {
   provider = "prisma-client-js"
@@ -15,8 +15,10 @@ model User {
   email         String    @unique
   passwordHash  String
   name          String
+  phone         String?
   role          String    @default("STUDENT") // STUDENT, INDUSTRY, FACULTY, INSTITUTION, ADMIN
   avatarUrl     String?
+  isOnboarded   Boolean   @default(false)
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -30,70 +32,93 @@ model User {
 }
 
 model StudentProfile {
-  id             String   @id @default(cuid())
-  userId         String   @unique
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  collegeName    String   @default("National Institute of Technology")
-  degree         String   @default("B.Tech")
-  department     String   @default("Computer Science & Engineering")
-  graduationYear Int      @default(2026)
-  cgpa           Float?   @default(8.5)
-  rollNo         String?
-  bio            String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collegeName        String   @default("National Institute of Technology")
+  university         String?  @default("National University")
+  degree             String   @default("B.Tech")
+  department         String   @default("Computer Science & Engineering")
+  currentYear        Int?     @default(3)
+  currentSemester    Int?     @default(6)
+  graduationYear     Int      @default(2026)
+  cgpa               Float?   @default(8.5)
+  rollNo             String?
+  bio                String?
+  targetJobRole      String?  @default("Full-Stack AI Solutions Architect")
+  preferredLocation  String?  @default("Bengaluru / Remote")
+  preferredIndustry  String?  @default("AI & Cloud Software")
+  softSkills         String?  @default("Problem Solving, Team Leadership, Fast Learner")
+  certifications     String?
+  experienceSummary  String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  skills         StudentSkill[]
-  projects       PortfolioProject[]
-  roadmaps       LearningRoadmap[]
-  applications   JobApplication[]
-  bookings       MentorshipBooking[]
+  skills             StudentSkill[]
+  projects           PortfolioProject[]
+  roadmaps           LearningRoadmap[]
+  applications       JobApplication[]
+  bookings           MentorshipBooking[]
 }
 
 model IndustryProfile {
-  id             String   @id @default(cuid())
-  userId         String   @unique
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyName    String   @default("TechCorp Global")
-  companyWebsite String   @default("https://techcorp.example.com")
-  designation    String?  @default("Talent Acquisition Lead")
-  domain         String?  @default("Software & Cloud Engineering")
-  isVerified     Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName        String   @default("TechCorp Global")
+  companyWebsite     String   @default("https://techcorp.example.com")
+  designation        String?  @default("Talent Acquisition Lead")
+  domain             String?  @default("Software & Cloud Engineering")
+  companyDescription String?  @default("Next-generation enterprise software, cloud infrastructure, and AI systems.")
+  companySize        String?  @default("500-1000 employees")
+  location           String?  @default("Bengaluru / Hybrid")
+  hiringAreas        String?  @default("Full-Stack, Cloud DevOps, AI/ML")
+  skillsRequired     String?  @default("React.js, Python, PostgreSQL, Docker")
+  isVerified         Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  jobPostings    JobPosting[]
+  jobPostings        JobPosting[]
 }
 
 model FacultyProfile {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  institutionName String   @default("National Institute of Technology")
-  department      String   @default("Computer Science & Engineering")
-  designation     String   @default("Associate Professor")
-  specialization  String?  @default("Distributed Systems & Cloud Computing")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  institutionName    String   @default("National Institute of Technology")
+  department         String   @default("Computer Science & Engineering")
+  designation        String   @default("Associate Professor")
+  qualifications     String?  @default("Ph.D. in Computer Science")
+  specialization     String?  @default("Distributed Systems & Cloud Computing")
+  researchInterests  String?  @default("Distributed AI, Vector Databases, NEP 2020 OBE")
+  mentorshipAreas    String?  @default("Full-Stack Architecture, Career Guidance, Capstone Projects")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  mentorshipSlots MentorshipSlot[]
-  endorsements    FacultyEndorsement[]
+  mentorshipSlots    MentorshipSlot[]
+  endorsements       FacultyEndorsement[]
 }
 
 model InstitutionProfile {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  institutionName String   @default("National Institute of Technology")
-  institutionType String   @default("Tier-1 Institute (IIT/NIT/IIIT)")
-  officialEmail   String?
-  website         String?
-  city            String?  @default("Tiruchirappalli")
-  state           String?  @default("Tamil Nadu")
-  code            String?  @default("NIT-01")
-  nirfRank        Int?     @default(9)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tpoName                String?  @default("Prof. S. Meenakshi")
+  tpoDesignation         String?  @default("Head of Training & Placement")
+  institutionName        String   @default("National Institute of Technology")
+  institutionType        String   @default("Tier-1 Institute (IIT/NIT/IIIT)")
+  universityAffiliation  String?  @default("Central University Board")
+  officialEmail          String?
+  website                String?  @default("https://nit.ac.in")
+  city                   String?  @default("Tiruchirappalli")
+  state                  String?  @default("Tamil Nadu")
+  address                String?  @default("Tanjore Main Road, National Highway 67")
+  departmentsList        String?  @default("CSE, IT, AI & Data Science, ECE, EEE, Mechanical")
+  studentPopulation      Int?     @default(4500)
+  code                   String?  @default("NIT-01")
+  nirfRank               Int?     @default(9)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 }
 
 model PasswordResetToken {
@@ -107,7 +132,7 @@ model PasswordResetToken {
 }
 
 // ----------------------------------------------------
-// PHASE 3 MODELS: SKILL TAXONOMY, ASSESSMENTS & OBE
+// SKILL TAXONOMY, ASSESSMENTS & OBE
 // ----------------------------------------------------
 
 model Skill {
@@ -163,7 +188,7 @@ model AssessmentQuestion {
   assessmentId       String
   assessment         Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
   questionText       String
-  optionsJson        String     // JSON array of strings: '["Option A", "Option B", "Option C", "Option D"]'
+  optionsJson        String     // JSON array of strings
   correctOptionIndex Int        // 0-indexed correct option
   explanation        String?
 }
@@ -196,7 +221,7 @@ model PortfolioProject {
 }
 
 // ----------------------------------------------------
-// PHASE 4 MODELS: AI SKILL-GAP & LEARNING ROADMAPS
+// AI SKILL-GAP & LEARNING ROADMAPS
 // ----------------------------------------------------
 
 model TargetRole {
@@ -208,7 +233,7 @@ model TargetRole {
   avgSalaryRange      String            @default("₹18 - ₹32 LPA")
   industryDemandLevel String            @default("HIGH") // HIGH, VERY HIGH, CRITICAL
   icon                String?           @default("Sparkles")
-  requiredSkillsJson  String            // JSON Array: [{ name: "React.js & Next.js", minBenchmark: 85, weight: 5, isMandatory: true, category: "Frameworks" }]
+  requiredSkillsJson  String            // JSON Array of required skills
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
 
@@ -247,7 +272,7 @@ model RoadmapMilestone {
   description    String
   skillName      String
   gapDelta       Float           @default(0.0)
-  resourceType   String          @default("VIDEO") // VIDEO, PROJECT, ARTICLE, DOCS, CERTIFICATION, LAB
+  resourceType   String          @default("VIDEO") // VIDEO, PROJECT, ARTICLE, DOCS, CERTIFICATION, LAB, COURSE
   resourceUrl    String
   provider       String?         @default("Coursera")
   estimatedHours Int             @default(6)
@@ -258,7 +283,7 @@ model RoadmapMilestone {
 }
 
 // ----------------------------------------------------
-// PHASE 5 MODELS: RECRUITER ATS & JOB DRIVES
+// RECRUITER ATS & JOB DRIVES
 // ----------------------------------------------------
 
 model JobPosting {
@@ -273,7 +298,7 @@ model JobPosting {
   minCgpa            Float            @default(7.5)
   deadline           DateTime?
   status             String           @default("OPEN") // OPEN, CLOSED, FILLED
-  requiredSkillsJson String           // JSON Array: [{ name: "React.js", weight: 5, minBenchmark: 80, isMandatory: true }]
+  requiredSkillsJson String           // JSON Array of required skills
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
 
@@ -297,7 +322,7 @@ model JobApplication {
 }
 
 // ----------------------------------------------------
-// PHASE 6 MODELS: FACULTY MENTORSHIP & ACCREDITATION
+// FACULTY MENTORSHIP & ACCREDITATION
 // ----------------------------------------------------
 
 model MentorshipSlot {
@@ -340,6 +365,3 @@ model FacultyEndorsement {
   feedback         String?
   createdAt        DateTime       @default(now())
 }
-
-
-

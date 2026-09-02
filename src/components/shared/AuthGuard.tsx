@@ -11,11 +11,13 @@ import { Badge } from "@/components/ui/Badge";
 
 interface AuthGuardProps {
   allowedRoles?: UserRole[];
+  requireOnboarded?: boolean;
   children: React.ReactNode;
 }
 
 export const AuthGuard: React.FC<AuthGuardProps> = ({
   allowedRoles,
+  requireOnboarded = true,
   children,
 }) => {
   const { user, loading, isAuthenticated, logout, getDashboardRouteForRole } = useAuth();
@@ -28,8 +30,21 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.replace(`/login?redirect=${encodeURIComponent(router.asPath)}`);
+      return;
     }
-  }, [loading, isAuthenticated, router]);
+
+    // If authenticated but onboarding is incomplete, redirect to /onboarding
+    if (
+      !loading &&
+      isAuthenticated &&
+      user &&
+      requireOnboarded &&
+      !user.isOnboarded &&
+      router.pathname !== "/onboarding"
+    ) {
+      router.replace("/onboarding");
+    }
+  }, [loading, isAuthenticated, user, requireOnboarded, router]);
 
   // Handle automatic redirect if accessing wrong role's dashboard
   useEffect(() => {
@@ -55,6 +70,10 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
 
   if (!isAuthenticated) {
     return null; // Will redirect in useEffect
+  }
+
+  if (requireOnboarded && user && !user.isOnboarded && router.pathname !== "/onboarding") {
+    return null; // Will redirect to /onboarding
   }
 
   if (!isRoleAuthorized && user) {

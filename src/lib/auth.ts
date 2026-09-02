@@ -18,7 +18,17 @@ export function signJwtToken(payload: UserSession): string {
   const options: SignOptions = {
     expiresIn: "7d",
   };
-  return jwt.sign({ ...payload }, JWT_SECRET, options);
+  // Store only essential user identity metadata in JWT to keep cookie size minimal
+  const tokenPayload = {
+    id: payload.id,
+    email: payload.email,
+    name: payload.name,
+    phone: payload.phone,
+    role: payload.role,
+    avatarUrl: payload.avatarUrl,
+    isOnboarded: payload.isOnboarded,
+  };
+  return jwt.sign(tokenPayload, JWT_SECRET, options);
 }
 
 export function verifyJwtToken(token: string): UserSession | null {
@@ -35,9 +45,24 @@ export async function getUserWithProfile(userId: string): Promise<UserSession | 
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
-        studentProfile: true,
-        industryProfile: true,
-        facultyProfile: true,
+        studentProfile: {
+          include: {
+            skills: { include: { skill: true } },
+            projects: true,
+            roadmaps: { include: { milestones: true } },
+          },
+        },
+        industryProfile: {
+          include: {
+            jobPostings: true,
+          },
+        },
+        facultyProfile: {
+          include: {
+            mentorshipSlots: true,
+            endorsements: true,
+          },
+        },
         institutionProfile: true,
       },
     });
@@ -48,8 +73,10 @@ export async function getUserWithProfile(userId: string): Promise<UserSession | 
       id: user.id,
       email: user.email,
       name: user.name,
+      phone: user.phone || undefined,
       role: user.role as UserRole,
       avatarUrl: user.avatarUrl || undefined,
+      isOnboarded: user.isOnboarded,
       studentProfile: user.studentProfile || undefined,
       industryProfile: user.industryProfile || undefined,
       facultyProfile: user.facultyProfile || undefined,
@@ -59,32 +86,3 @@ export async function getUserWithProfile(userId: string): Promise<UserSession | 
     return null;
   }
 }
-
-// Preset Demo Profiles
-export const DEMO_PRESETS: Record<UserRole, { email: string; name: string; role: UserRole }> = {
-  STUDENT: {
-    email: "student@sih.edu",
-    name: "Aarav Sharma",
-    role: "STUDENT",
-  },
-  INDUSTRY: {
-    email: "recruiter@techcorp.com",
-    name: "Priya Nair",
-    role: "INDUSTRY",
-  },
-  FACULTY: {
-    email: "faculty@university.edu",
-    name: "Dr. Ramesh Verma",
-    role: "FACULTY",
-  },
-  INSTITUTION: {
-    email: "admin@nit-campus.edu",
-    name: "Prof. S. Meenakshi",
-    role: "INSTITUTION",
-  },
-  ADMIN: {
-    email: "admin@sih-platform.gov.in",
-    name: "National Platform Admin",
-    role: "ADMIN",
-  },
-};

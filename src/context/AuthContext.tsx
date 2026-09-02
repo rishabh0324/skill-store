@@ -2,17 +2,17 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { UserRole, UserSession, RegisterPayload, LoginPayload } from "@/types";
-import { DEMO_PRESETS } from "@/lib/auth";
+import { UserRole, UserSession, RegisterPayload, LoginPayload, OnboardingPayload } from "@/types";
 
 interface AuthContextType {
   user: UserSession | null;
   loading: boolean;
   isAuthenticated: boolean;
-  login: (credentials: LoginPayload) => Promise<{ success: boolean; message: string; role?: UserRole }>;
-  register: (payload: RegisterPayload) => Promise<{ success: boolean; message: string; role?: UserRole }>;
+  isOnboarded: boolean;
+  login: (credentials: LoginPayload) => Promise<{ success: boolean; message: string; role?: UserRole; isOnboarded?: boolean }>;
+  register: (payload: RegisterPayload) => Promise<{ success: boolean; message: string; role?: UserRole; isOnboarded?: boolean }>;
+  completeOnboarding: (data: OnboardingPayload) => Promise<{ success: boolean; message: string; role?: UserRole }>;
   logout: () => Promise<void>;
-  quickDemoLogin: (role: UserRole) => Promise<void>;
   refreshUser: () => Promise<void>;
   getDashboardRouteForRole: (role: UserRole) => string;
 }
@@ -77,11 +77,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           success: true,
           message: data.message || "Login successful",
           role: data.data.user.role,
+          isOnboarded: data.data.user.isOnboarded,
         };
       }
       return {
         success: false,
-        message: data.message || "Login failed. Please check your credentials.",
+        message: data.message || "Invalid email or password. Please check your credentials.",
       };
     } catch (err: any) {
       return {
@@ -104,18 +105,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(data.data.user);
         return {
           success: true,
-          message: data.message || "Registration successful",
+          message: data.message || "Account registered successfully!",
           role: data.data.user.role,
+          isOnboarded: false,
         };
       }
       return {
         success: false,
-        message: data.message || "Registration failed. Please check your inputs.",
+        message: data.message || "Registration failed. Please review your inputs.",
       };
     } catch (err: any) {
       return {
         success: false,
         message: err.message || "An error occurred during registration.",
+      };
+    }
+  };
+
+  const completeOnboarding = async (onboardingData: OnboardingPayload) => {
+    try {
+      const res = await fetch("/api/v1/auth/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(onboardingData),
+      });
+      const data = await res.json();
+
+      if (data.success && data.data?.user) {
+        setUser(data.data.user);
+        return {
+          success: true,
+          message: data.message || "Onboarding complete!",
+          role: data.data.user.role,
+        };
+      }
+      return {
+        success: false,
+        message: data.message || "Failed to save onboarding details.",
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        message: err.message || "An error occurred while saving your onboarding details.",
       };
     }
   };
@@ -131,29 +162,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const quickDemoLogin = async (role: UserRole) => {
-    const preset = DEMO_PRESETS[role];
-    if (preset) {
-      const result = await login({
-        email: preset.email,
-        password: "Password@123",
-      });
-      if (result.success && result.role) {
-        router.push(getDashboardRouteForRole(result.role));
-      }
-    }
-  };
-
   return (
     <AuthContext.Provider
       value={{
         user,
         loading,
         isAuthenticated: !!user,
+        isOnboarded: user?.isOnboarded || false,
         login,
         register,
+        completeOnboarding,
         logout,
-        quickDemoLogin,
         refreshUser,
         getDashboardRouteForRole,
       }}

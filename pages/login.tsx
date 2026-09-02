@@ -4,24 +4,27 @@ import { useRouter } from "next/router";
 import { useAuth } from "@/context/AuthContext";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Layers, Mail, Lock, ArrowRight, AlertCircle, Sparkles, CheckCircle2 } from "lucide-react";
-import { UserRole } from "@/types";
+import { Layers, Mail, Lock, ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isAuthenticated, user, getDashboardRouteForRole, quickDemoLogin } = useAuth();
+  const { login, isAuthenticated, user, getDashboardRouteForRole } = useAuth();
 
-  const [email, setEmail] = useState("student@sih.edu");
-  const [password, setPassword] = useState("Password@123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  // If already authenticated, redirect to role dashboard
+  // If already authenticated, redirect to appropriate route
   useEffect(() => {
     if (isAuthenticated && user) {
-      const redirectUrl = (router.query.redirect as string) || getDashboardRouteForRole(user.role);
-      router.replace(redirectUrl);
+      if (!user.isOnboarded) {
+        router.replace("/onboarding");
+      } else {
+        const redirectUrl = (router.query.redirect as string) || getDashboardRouteForRole(user.role);
+        router.replace(redirectUrl);
+      }
     }
   }, [isAuthenticated, user, router, getDashboardRouteForRole]);
 
@@ -34,21 +37,19 @@ export default function LoginPage() {
     const result = await login({ email, password });
 
     if (result.success && result.role) {
-      setSuccessMessage("Login successful! Redirecting to your dashboard...");
-      const redirectUrl = (router.query.redirect as string) || getDashboardRouteForRole(result.role);
+      setSuccessMessage("Login successful! Redirecting...");
       setTimeout(() => {
-        router.push(redirectUrl);
-      }, 500);
+        if (result.isOnboarded === false) {
+          router.push("/onboarding");
+        } else {
+          const redirectUrl = (router.query.redirect as string) || getDashboardRouteForRole(result.role!);
+          router.push(redirectUrl);
+        }
+      }, 400);
     } else {
       setErrorMessage(result.message);
       setIsLoading(false);
     }
-  };
-
-  const handleQuickFill = (role: UserRole, demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword("Password@123");
-    setErrorMessage("");
   };
 
   return (
@@ -62,51 +63,6 @@ export default function LoginPage() {
           </div>
           <h2 className="text-2xl font-black text-white tracking-tight">Sign In to bridgeNext ai</h2>
           <p className="text-xs text-slate-400">SIH 2026 Academia–Industry Collaboration Platform</p>
-        </div>
-
-        {/* Quick Demo Fill Buttons for Evaluators */}
-        <div className="p-3.5 rounded-2xl bg-indigo-500/[0.07] border border-indigo-500/20 space-y-2">
-          <div className="flex items-center justify-between text-[11px]">
-            <span className="font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1">
-              <Sparkles size={12} className="text-accent-cyan" /> 1-Click Demo Personas:
-            </span>
-            <span className="text-[10px] text-slate-400 font-mono">Password@123</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-1.5 text-xs">
-            <button
-              type="button"
-              onClick={() => handleQuickFill("STUDENT", "student@sih.edu")}
-              className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-left border border-white/5 hover:border-indigo-500/30 transition-all flex items-center gap-1.5"
-            >
-              <span>🎓</span>
-              <span className="font-medium">Student</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickFill("INDUSTRY", "recruiter@techcorp.com")}
-              className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-left border border-white/5 hover:border-cyan-500/30 transition-all flex items-center gap-1.5"
-            >
-              <span>💼</span>
-              <span className="font-medium">Industry</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickFill("FACULTY", "faculty@university.edu")}
-              className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-left border border-white/5 hover:border-amber-500/30 transition-all flex items-center gap-1.5"
-            >
-              <span>🏅</span>
-              <span className="font-medium">Faculty</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickFill("INSTITUTION", "admin@nit-campus.edu")}
-              className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-left border border-white/5 hover:border-emerald-500/30 transition-all flex items-center gap-1.5"
-            >
-              <span>🏛️</span>
-              <span className="font-medium">Institution</span>
-            </button>
-          </div>
         </div>
 
         {/* Error / Success Alerts */}
@@ -124,40 +80,43 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Login Form */}
+        {/* Real Login Form */}
         <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">Official Email Address</label>
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-slate-300">Email Address</label>
             <div className="relative">
-              <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="email"
                 required
-                placeholder="name@organization.edu"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full glass-input pl-10 pr-3 py-2.5 rounded-xl text-xs"
+                placeholder="name@institution.edu or name@company.com"
+                className="w-full bg-slate-900/90 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all pl-10"
               />
+              <Mail size={16} className="absolute left-3.5 top-3 text-slate-500" />
             </div>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
               <label className="block text-xs font-semibold text-slate-300">Password</label>
-              <Link href="/forgot-password" className="text-[11px] text-primary-400 hover:text-primary-300 font-medium">
+              <Link
+                href="/forgot-password"
+                className="text-[11px] font-medium text-primary-400 hover:text-primary-300"
+              >
                 Forgot password?
               </Link>
             </div>
             <div className="relative">
-              <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="password"
                 required
-                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full glass-input pl-10 pr-3 py-2.5 rounded-xl text-xs"
+                placeholder="••••••••"
+                className="w-full bg-slate-900/90 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all pl-10"
               />
+              <Lock size={16} className="absolute left-3.5 top-3 text-slate-500" />
             </div>
           </div>
 
@@ -165,18 +124,18 @@ export default function LoginPage() {
             type="submit"
             variant="primary"
             size="lg"
-            isLoading={isLoading}
             className="w-full mt-2"
+            isLoading={isLoading}
             icon={<ArrowRight size={16} />}
           >
-            Sign In to Dashboard
+            Sign In to Platform
           </Button>
         </form>
 
-        <div className="text-center pt-2 text-xs text-slate-400 border-t border-white/5">
-          <span>Don't have an account? </span>
-          <Link href="/register" className="text-primary-400 font-semibold hover:underline">
-            Register your profile
+        <div className="pt-2 text-center text-xs text-slate-400 border-t border-white/5">
+          Don't have an account?{" "}
+          <Link href="/register" className="font-bold text-primary-400 hover:text-primary-300">
+            Create an Account →
           </Link>
         </div>
       </Card>

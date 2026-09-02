@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
-import { comparePassword, signJwtToken } from "@/lib/auth";
+import { comparePassword, signJwtToken, getUserWithProfile } from "@/lib/auth";
 import { UserRole, UserSession } from "@/types";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -22,9 +22,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase().trim() },
       include: {
-        studentProfile: true,
-        industryProfile: true,
-        facultyProfile: true,
+        studentProfile: {
+          include: {
+            skills: { include: { skill: true } },
+            projects: true,
+            roadmaps: { include: { milestones: true } },
+          },
+        },
+        industryProfile: {
+          include: {
+            jobPostings: true,
+          },
+        },
+        facultyProfile: {
+          include: {
+            mentorshipSlots: true,
+            endorsements: true,
+          },
+        },
         institutionProfile: true,
       },
     });
@@ -57,8 +72,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       id: user.id,
       email: user.email,
       name: user.name,
+      phone: user.phone || undefined,
       role: user.role as UserRole,
       avatarUrl: user.avatarUrl || undefined,
+      isOnboarded: user.isOnboarded,
       studentProfile: user.studentProfile || undefined,
       industryProfile: user.industryProfile || undefined,
       facultyProfile: user.facultyProfile || undefined,
@@ -79,6 +96,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data: {
         user: userSession,
         token,
+        isOnboarded: user.isOnboarded,
       },
     });
   } catch (error: any) {
